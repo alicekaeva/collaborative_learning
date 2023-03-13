@@ -28,10 +28,14 @@ class Tag
     #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: 'tags')]
     private Collection $relatedPosts;
 
+    #[ORM\ManyToMany(targetEntity: Group::class, mappedBy: 'tags')]
+    private Collection $relatedGroups;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->relatedPosts = new ArrayCollection();
+        $this->relatedGroups = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -109,6 +113,33 @@ class Tag
     {
         if ($this->relatedPosts->removeElement($relatedPost)) {
             $relatedPost->removeTag($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Group>
+     */
+    public function getRelatedGroups(): Collection
+    {
+        return $this->relatedGroups;
+    }
+
+    public function addRelatedGroup(Group $relatedGroup): self
+    {
+        if (!$this->relatedGroups->contains($relatedGroup)) {
+            $this->relatedGroups->add($relatedGroup);
+            $relatedGroup->addTag($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRelatedGroup(Group $relatedGroup): self
+    {
+        if ($this->relatedGroups->removeElement($relatedGroup)) {
+            $relatedGroup->removeTag($this);
         }
 
         return $this;

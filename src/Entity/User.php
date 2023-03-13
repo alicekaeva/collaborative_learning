@@ -53,11 +53,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Post::class, mappedBy: 'addedToFav')]
     private Collection $favorites;
 
+    #[ORM\OneToMany(mappedBy: 'creatorUser', targetEntity: Material::class)]
+    private Collection $materials;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class, orphanRemoval: true)]
+    private Collection $messages;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
         $this->posts = new ArrayCollection();
         $this->favorites = new ArrayCollection();
+        $this->materials = new ArrayCollection();
+        $this->messages = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -269,6 +277,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         if ($this->favorites->removeElement($favorite)) {
             $favorite->removeAddedToFav($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Material>
+     */
+    public function getMaterials(): Collection
+    {
+        return $this->materials;
+    }
+
+    public function addMaterial(Material $material): self
+    {
+        if (!$this->materials->contains($material)) {
+            $this->materials->add($material);
+            $material->setCreatorUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMaterial(Material $material): self
+    {
+        if ($this->materials->removeElement($material)) {
+            // set the owning side to null (unless already changed)
+            if ($material->getCreatorUser() === $this) {
+                $material->setCreatorUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Message>
+     */
+    public function getMessages(): Collection
+    {
+        return $this->messages;
+    }
+
+    public function addMessage(Message $message): self
+    {
+        if (!$this->messages->contains($message)) {
+            $this->messages->add($message);
+            $message->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeMessage(Message $message): self
+    {
+        if ($this->messages->removeElement($message)) {
+            // set the owning side to null (unless already changed)
+            if ($message->getSender() === $this) {
+                $message->setSender(null);
+            }
         }
 
         return $this;
