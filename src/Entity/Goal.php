@@ -24,7 +24,7 @@ class Goal
     #[ORM\Column(nullable: true)]
     private ?int $points = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeInterface $deadline = null;
 
     public function getId(): ?int

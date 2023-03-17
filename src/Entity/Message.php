@@ -20,7 +20,7 @@ class Message
     #[ORM\Column]
     private ?bool $isPinned = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeInterface $sendingDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]

@@ -22,7 +22,7 @@ class Post
     #[ORM\Column(length: 500)]
     private ?string $content = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeInterface $postingDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]

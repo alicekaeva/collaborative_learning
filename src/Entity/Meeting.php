@@ -23,7 +23,7 @@ class Meeting
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $link = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private ?\DateTimeInterface $heldOn = null;
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]

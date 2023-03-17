@@ -47,9 +47,7 @@ class Group
     #[ORM\OneToMany(mappedBy: 'creatorGroup', targetEntity: Material::class)]
     private Collection $materials;
 
-    // блин по-моему тут тоже должно быть orphanRemoval: true , но меня мейкер не спрашивал про orphanRemoval
-    // если я просто допишу orphanRemoval: true это ж никак на БД не отразится, а наверное надо чтоб и БД это задело
-    #[ORM\OneToMany(mappedBy: 'receivingGroup', targetEntity: Message::class)]
+    #[ORM\OneToMany(mappedBy: 'receivingGroup', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $messages;
 
     public function __construct()
