@@ -21,7 +21,7 @@ class Task
     private ?string $link = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
-    private ?\DateTimeInterface $deadline = null;
+    private ?\DateTimeImmutable $deadline = null;
 
     #[ORM\Column(nullable: true)]
     private ?int $points = null;

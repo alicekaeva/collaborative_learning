@@ -21,7 +21,7 @@ class Message
     private ?bool $isPinned = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeInterface $sendingDate = null;
+    private ?\DateTimeImmutable $sendingDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'messages')]
     #[ORM\JoinColumn(nullable: false)]
@@ -67,7 +67,7 @@ class Message
         return $this->sendingDate;
     }
 
-    public function setSendingDate(\DateTimeInterface $sendingDate): self
+    public function setSendingDate(\DateTimeImmutable $sendingDate): self
     {
         $this->sendingDate = $sendingDate;
 

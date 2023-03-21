@@ -23,7 +23,7 @@ class Post
     private ?string $content = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeInterface $postingDate = null;
+    private ?\DateTimeImmutable $postingDate = null;
 
     #[ORM\ManyToOne(inversedBy: 'posts')]
     #[ORM\JoinColumn(nullable: false)]
@@ -75,7 +75,7 @@ class Post
         return $this->postingDate;
     }
 
-    public function setPostingDate(\DateTimeInterface $postingDate): self
+    public function setPostingDate(\DateTimeImmutable $postingDate): self
     {
         $this->postingDate = $postingDate;
 

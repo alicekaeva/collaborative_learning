@@ -24,7 +24,7 @@ class Meeting
     private ?string $link = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private ?\DateTimeInterface $heldOn = null;
+    private ?\DateTimeImmutable $heldOn = null;
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     #[ORM\JoinColumn(nullable: false)]
@@ -76,7 +76,7 @@ class Meeting
         return $this->heldOn;
     }
 
-    public function setHeldOn(\DateTimeInterface $heldOn): self
+    public function setHeldOn(\DateTimeImmutable $heldOn): self
     {
         $this->heldOn = $heldOn;
 
