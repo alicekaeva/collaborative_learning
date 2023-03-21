@@ -71,7 +71,7 @@ class Meeting
         return $this;
     }
 
-    public function getHeldOn(): ?\DateTimeInterface
+    public function getHeldOn(): ?\DateTimeImmutable
     {
         return $this->heldOn;
     }

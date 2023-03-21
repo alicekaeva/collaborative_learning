@@ -59,12 +59,12 @@ class Task
         return $this;
     }
 
-    public function getDeadline(): ?\DateTimeInterface
+    public function getDeadline(): ?\DateTimeImmutable
     {
         return $this->deadline;
     }
 
-    public function setDeadline(?\DateTimeInterface $deadline): self
+    public function setDeadline(?\DateTimeImmutable $deadline): self
     {
         $this->deadline = $deadline;
 

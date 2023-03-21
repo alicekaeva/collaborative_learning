@@ -70,7 +70,7 @@ class Post
         return $this;
     }
 
-    public function getPostingDate(): ?\DateTimeInterface
+    public function getPostingDate(): ?\DateTimeImmutable
     {
         return $this->postingDate;
     }

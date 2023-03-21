@@ -62,7 +62,7 @@ class Message
         return $this;
     }
 
-    public function getSendingDate(): ?\DateTimeInterface
+    public function getSendingDate(): ?\DateTimeImmutable
     {
         return $this->sendingDate;
     }
