@@ -59,6 +59,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $messages;
 
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $interests = null;
+
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -338,6 +341,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $message->setSender(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getInterests(): ?string
+    {
+        return $this->interests;
+    }
+
+    public function setInterests(?string $interests): self
+    {
+        $this->interests = $interests;
 
         return $this;
     }

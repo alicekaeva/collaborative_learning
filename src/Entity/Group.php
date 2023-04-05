@@ -50,6 +50,12 @@ class Group
     #[ORM\OneToMany(mappedBy: 'receivingGroup', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $messages;
 
+    #[ORM\Column]
+    private ?int $requiredTeachers = null;
+
+    #[ORM\Column]
+    private ?int $requiredStudents = null;
+
     public function __construct()
     {
         $this->teachers = new ArrayCollection();
@@ -321,6 +327,30 @@ class Group
                 $message->setReceivingGroup(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getRequiredTeachers(): ?int
+    {
+        return $this->requiredTeachers;
+    }
+
+    public function setRequiredTeachers(int $requiredTeachers): self
+    {
+        $this->requiredTeachers = $requiredTeachers;
+
+        return $this;
+    }
+
+    public function getRequiredStudents(): ?int
+    {
+        return $this->requiredStudents;
+    }
+
+    public function setRequiredStudents(int $requiredStudents): self
+    {
+        $this->requiredStudents = $requiredStudents;
 
         return $this;
     }
