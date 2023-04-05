@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Meeting{% endblock %}
+
+{% block body %}
+    <h1>Meeting</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ meeting.id }}</td>
+            </tr>
+            <tr>
+                <th>Name</th>
+                <td>{{ meeting.name }}</td>
+            </tr>
+            <tr>
+                <th>Agenda</th>
+                <td>{{ meeting.agenda }}</td>
+            </tr>
+            <tr>
+                <th>Link</th>
+                <td>{{ meeting.link }}</td>
+            </tr>
+            <tr>
+                <th>HeldOn</th>
+                <td>{{ meeting.heldOn ? meeting.heldOn|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_meeting_index') }}">back to list</a>
+
+    <a href="{{ path('app_meeting_edit', {'id': meeting.id}) }}">edit</a>
+
+    {{ include('meeting/_delete_form.html.twig') }}
+{% endblock %}
