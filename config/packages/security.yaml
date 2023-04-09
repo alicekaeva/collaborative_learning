@@ -36,7 +36,7 @@ security:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/category, roles: ROLE_USER }
         - { path: ^/goal, roles: ROLE_TEACHER }
-        - { path: ^/material, roles: ROLE_STUDENT, ROLE_TEACHER }
+        - { path: ^/material, roles: [ROLE_STUDENT, ROLE_TEACHER] }
         - { path: ^/media, roles: ROLE_USER }
         - { path: ^/meeting, roles: ROLE_TEACHER }
         - { path: ^/message, roles: ROLE_USER }
