@@ -37,9 +37,4 @@
             </div>
         </div>
     {% endif %}
-    {% if app.user %}
-        <div class="alert alert-success shadow-lg w-96 m-5">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Выйти</a>
-        </div>
-    {% endif %}
 {% endblock %}
