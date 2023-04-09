@@ -1,28 +1,32 @@
 {% extends 'base.html.twig' %}
 {% block title %}Вход{% endblock %}
 {% block menu %}{% endblock %}
+
 {% block body %}
-    <form action="{{ path('app_login') }}" method="POST">
+    <form method="post">
         <div class="flex flex-col w-96 m-5">
             <div>
                 <label class="block text-sm text-gray-700 font-medium">Email</label>
-                <input type="text" name="_username" value="{{ lastUsername }}"
-                       class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"/>
-            </div>
-            <div class="w-full">
-                <label class="block text-sm text-gray-700 font-medium">Пароль</label>
-                <input type="password" name="_password"
+                <input type="email" value="{{ last_username }}" name="email" id="inputEmail" autocomplete="email"
+                       required autofocus
                        class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"/>
             </div>
             <div>
-                <input type="hidden" name="_target_path" value="/post"/>
+                <label class="block text-sm text-gray-700 font-medium">Пароль</label>
+                <input type="password" name="password" id="inputPassword" autocomplete="current-password" required
+                       class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"/>
+            </div>
+            <div>
+                <input type="hidden" name="_csrf_token"
+                       value="{{ csrf_token('authenticate') }}"
+                >
                 <button type="submit" class="btn btn-outline w-full">Войти</button>
                 <label class="block mt-1">Нет аккаунта? <a href="{{ path('app_register') }}" class="link">Зарегистрируйтесь</a></label>
             </div>
         </div>
     </form>
     {% if error %}
-        <div class="alert alert-error shadow-lg w-96 m-5">
+        <div class="alert alert-error shadow-lg ">
             <div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
                      viewBox="0 0 24 24">
@@ -31,6 +35,11 @@
                 </svg>
                 <span>{{ error.messageKey|trans(error.messageData, 'security') }}</span>
             </div>
+        </div>
+    {% endif %}
+    {% if app.user %}
+        <div class="alert alert-success shadow-lg w-96 m-5">
+            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Выйти</a>
         </div>
     {% endif %}
 {% endblock %}
