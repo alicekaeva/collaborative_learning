@@ -1,0 +1,42 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Регистрация{% endblock %}
+{% block menu %}{% endblock %}
+
+{% block body %}
+    {{ form_start(registrationForm) }}
+    <div class="flex flex-col w-96 m-5">
+        <div>
+            {{ form_label(registrationForm.email, 'Email', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(registrationForm.email, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(registrationForm.email) }}
+        </div>
+        <div>
+            {{ form_label(registrationForm.fullName, 'ФИО', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(registrationForm.fullName, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(registrationForm.fullName) }}
+        </div>
+        <div>
+            {{ form_label(registrationForm.phoneNumber, 'Телефонный номер', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(registrationForm.phoneNumber, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(registrationForm.phoneNumber) }}
+        </div>
+        <div>
+            {{ form_label(registrationForm.age, 'Возраст', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(registrationForm.age, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(registrationForm.age) }}
+        </div>
+        <div>
+            {{ form_label(registrationForm.almaMater, 'Уровень образования', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(registrationForm.almaMater, {'attr': {'class': 'block w-full shadow-sm border-gray-300 h-11 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(registrationForm.almaMater) }}
+        </div>
+        <div>
+            {{ form_label(registrationForm.plainPassword, 'Пароль', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+        </div>
+        <button type="submit" class="btn btn-outline w-full">Зарегистрироваться</button>
+    </div>
+    {{ form_errors(registrationForm.plainPassword) }}
+    {{ form_end(registrationForm) }}
+{% endblock %}
