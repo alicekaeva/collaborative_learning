@@ -1,13 +1,41 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit User{% endblock %}
+{% block title %}Редактирование{% endblock %}
 
 {% block body %}
-    <h1>Edit User</h1>
-
-    {{ include('user/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_user_index') }}">back to list</a>
-
-    {{ include('user/_delete_form.html.twig') }}
+    {{ form_start(form) }}
+    <div class="flex flex-col w-96 m-5">
+        <div>
+            {{ form_label(form.email, 'Email', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.email, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.email) }}
+        </div>
+        <div>
+            {{ form_label(form.fullName, 'ФИО', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.fullName, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.fullName) }}
+        </div>
+        <div>
+            {{ form_label(form.phoneNumber, 'Телефонный номер', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.phoneNumber, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.phoneNumber) }}
+        </div>
+        <div>
+            {{ form_label(form.age, 'Возраст', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.age, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.age) }}
+        </div>
+        <div>
+            {{ form_label(form.almaMater, 'Уровень образования', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.almaMater, {'attr': {'class': 'block w-full shadow-sm border-gray-300 h-11 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.almaMater) }}
+        </div>
+        <div>
+            {{ form_label(form.interests, 'Интересы', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.interests, {'attr': {'class': 'block w-full shadow-sm border-gray-300 h-11 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.interests) }}
+        </div>
+        <button class="btn btn-outline w-full">Сохранить изменения</button>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}
