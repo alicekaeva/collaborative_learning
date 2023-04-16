@@ -1,39 +1,30 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Post index{% endblock %}
+{% block title %}Объявления{% endblock %}
+{% block button %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <div class="flex justify-end">
+            <a class="btn mr-2" href="{{ path('app_post_show', {'id': app.user.id}) }}">Мои объявления</a>
+        </div>
+    {% endif %}
+{% endblock %}
 
 {% block body %}
-    <h1>Post index</h1>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Content</th>
-                <th>PostingDate</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for post in posts %}
-            <tr>
-                <td>{{ post.id }}</td>
-                <td>{{ post.name }}</td>
-                <td>{{ post.content }}</td>
-                <td>{{ post.postingDate ? post.postingDate|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_post_show', {'id': post.id}) }}">show</a>
-                    <a href="{{ path('app_post_edit', {'id': post.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_post_new') }}">Create new</a>
+    {% for post in posts %}
+        <div class="card w-full bg-base-100 shadow-xl mb-3">
+            <div class="card-body">
+                <div class="flex justify-between">
+                    <div>{{ post.author }}</div>
+                    <div>{{ post.postingDate ? post.postingDate|date('d/m/y') : '' }}</div>
+                </div>
+                <p class="card-title">{{ post.content }}</p>
+                <div class="card-actions justify-start">
+                    <div class="badge badge-outline bg-green-300">{{ post.tags[0].category.name }}</div>
+                    {% for tag in post.tags %}
+                        <div class="badge badge-outline bg-fuchsia-300">{{ tag }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
 {% endblock %}

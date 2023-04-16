@@ -16,9 +16,6 @@ class Post
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $name = null;
-
     #[ORM\Column(length: 500)]
     private ?string $content = null;
 
@@ -39,23 +36,12 @@ class Post
     {
         $this->addedToFav = new ArrayCollection();
         $this->tags = new ArrayCollection();
+        $this->postingDate = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getName(): ?string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): self
-    {
-        $this->name = $name;
-
-        return $this;
     }
 
     public function getContent(): ?string

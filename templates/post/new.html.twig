@@ -1,11 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Post{% endblock %}
+{% block title %}Создание объявления{% endblock %}
 
 {% block body %}
-    <h1>Create new Post</h1>
-
-    {{ include('post/_form.html.twig') }}
-
-    <a href="{{ path('app_post_index') }}">back to list</a>
+    <h1 class="ml-5 text-xl">Создание объявления</h1>
+    {{ form_start(form) }}
+    <div class="flex flex-col w-96 m-5">
+        <div>
+            {{ form_label(form.content, 'Описание', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.content, {'attr': {'class': 'textarea block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.content) }}
+        </div>
+        <div>
+            {{ form_label(form.tags, 'Тэги', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.tags) }}
+            {{ form_errors(form.tags) }}
+        </div>
+        <button class="btn btn-outline w-full">Создать</button>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}
