@@ -1,13 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Group{% endblock %}
+{% block title %}Редактирование группы{% endblock %}
 
 {% block body %}
-    <h1>Edit Group</h1>
-
-    {{ include('group/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_group_index') }}">back to list</a>
-
-    {{ include('group/_delete_form.html.twig') }}
+    <h1 class="ml-5 text-xl">Редактирование группы</h1>
+    {{ form_start(form) }}
+    <div class="flex flex-col w-96 m-5">
+        <div>
+            {{ form_label(form.name, 'Название', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.name, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+        <div>
+            {{ form_label(form.info, 'Описание', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.info, {'attr': {'class': 'textarea block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.info) }}
+        </div>
+        <div>
+            {{ form_label(form.requiredTeachers, 'Требуемое количество преподавателей', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.requiredTeachers, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.requiredTeachers) }}
+        </div>
+        <div>
+            {{ form_label(form.requiredStudents, 'Требуемое количество студентов', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.requiredStudents, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.requiredStudents) }}
+        </div>
+        <div>
+            {{ form_label(form.tags, 'Тэги', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.tags) }}
+            {{ form_errors(form.tags) }}
+        </div>
+        <button class="btn btn-outline w-full">Редактировать</button>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}
