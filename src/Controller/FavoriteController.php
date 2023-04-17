@@ -23,7 +23,7 @@ class FavoriteController extends AbstractController
         return $this->redirect($request->headers->get('referer'));
     }
 
-    #[Route('/unlfavorite/{id}', name: 'app_unfavorite')]
+    #[Route('/unfavorite/{id}', name: 'app_unfavorite')]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function unfavorite(Post $post, PostRepository $posts, Request $request): Response
     {
