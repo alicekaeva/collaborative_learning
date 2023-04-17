@@ -19,9 +19,9 @@
                 </div>
                 <p class="card-title">{{ post.content }}</p>
                 <div class="card-actions justify-start">
-                    <div class="badge badge-outline bg-green-300">{{ post.tags[0].category.name }}</div>
+                    <div class="badge badge-outline bg-green-200">{{ post.tags[0].category.name }}</div>
                     {% for tag in post.tags %}
-                        <div class="badge badge-outline bg-fuchsia-300">{{ tag }}</div>
+                        <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
                     {% endfor %}
                 </div>
             </div>
