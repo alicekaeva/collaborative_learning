@@ -14,7 +14,11 @@
         <div class="card w-full bg-base-100 shadow-xl mb-3">
             <div class="card-body">
                 <div class="flex justify-between">
-                    <div>{{ post.author }}</div>
+                    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+                        <a href="{{ path('app_user_show', {'id': post.author.id}) }}">{{ post.author }}</a>
+                    {% else %}
+                        <div>{{ post.author }}</div>
+                    {% endif %}
                     <div>{{ post.postingDate ? post.postingDate|date('d/m/y') : '' }}</div>
                 </div>
                 <p class="card-title">{{ post.content }}</p>
@@ -28,9 +32,11 @@
                     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                         <div>
                             {% if post.addedToFav.contains(app.user) %}
-                                <a href="{{ path('app_unfavorite', { id: post.id }) }}"><i class="fa-solid fa-star fa-lg" style="color: #f0e800;"></i></a>
+                                <a href="{{ path('app_unfavorite', { id: post.id }) }}"><i
+                                            class="fa-solid fa-star fa-lg" style="color: #f0e800;"></i></a>
                             {% else %}
-                                <a href="{{ path('app_favorite', { id: post.id }) }}"><i class="fa-regular fa-star fa-lg" style="color: #000000;"></i></a>
+                                <a href="{{ path('app_favorite', { id: post.id }) }}"><i
+                                            class="fa-regular fa-star fa-lg" style="color: #000000;"></i></a>
                             {% endif %}
                         </div>
                     {% endif %}
