@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Message;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,28 +40,30 @@ class MessageRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Message[] Returns an array of Message objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findAllUsersDialogs(int|User $user): array
+    {
+        return $this->createQueryBuilder('m')
+            ->select('DISTINCT u.fullName, u.id, MAX(m.sendingDate) AS lastSentDate')
+            ->leftJoin(User::class, 'u', 'WITH', 'u.id = m.sender OR u.id = m.receiver')
+            ->where('m.sender = :user OR m.receiver = :user')
+            ->andWhere('u.id <> :user')
+            ->groupBy('u.id')
+            ->orderBy('lastSentDate', 'DESC')
+            ->setParameter('user', $user instanceof User ? $user->getId() : $user)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Message
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findFullDialog(int|User $first, int|User $second): array
+    {
+        return $this->createQueryBuilder('m')
+            ->Where('m.sender = :first OR m.receiver = :first')
+            ->andWhere('m.sender = :second OR m.receiver = :second')
+            ->setParameter('first',
+                $first instanceof User ? $first->getId() : $first)
+            ->setParameter('second',
+                $second instanceof User ? $second->getId() : $second)
+            ->getQuery()
+            ->getResult();
+    }
 }

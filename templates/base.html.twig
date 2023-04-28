@@ -35,7 +35,7 @@
                         <li><a href="{{ path('app_post_index') }}">Объявления</a></li>
                         <li><a href="{{ path('app_group_index') }}">Группы</a></li>
                         <li><a href="{{ path('app_material_index') }}">Прикладные материалы</a></li>
-                        <li><a>Сообщения</a></li>
+                        <li><a href="{{ path('app_message_index') }}">Сообщения</a></li>
                         <li><a>Обучение</a></li>
                     {% else %}
                         <li><a href="{{ path('app_post_index') }}">Объявления</a></li>
@@ -86,5 +86,9 @@
         {% block body %}{% endblock %}
     </div>
 </div>
+<script>
+    const myDiv = document.getElementById("myDiv");
+    myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;
+</script>
 </body>
 </html>
