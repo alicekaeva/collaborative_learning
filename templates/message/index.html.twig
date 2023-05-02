@@ -58,4 +58,8 @@
             Выберите чат.
         </div>
     {% endif %}
+    <script>
+        const myDiv = document.getElementById("myDiv");
+        myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;
+    </script>
 {% endblock %}
