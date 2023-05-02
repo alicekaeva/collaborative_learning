@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Post;
 use App\Entity\User;
 use App\Form\PostType;
+use App\Repository\CategoryRepository;
 use App\Repository\PostRepository;
+use App\Repository\TagRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,24 +27,47 @@ class PostController extends AbstractController
 
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function new(Request $request, PostRepository $postRepository): Response
+    public function new(Request $request, PostRepository $postRepository, CategoryRepository $categoryRepository, TagRepository $tagRepository): Response
     {
-        $post = new Post();
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $post = $form->getData();
+        if ($request->isMethod('POST')) {
+            $content = $request->request->get('content');
+            $parameters = $request->request->all();
+            $tagIds = $parameters['tags'];
+            $post = new Post();
+            $post->setContent($content);
             $post->setAuthor($this->getUser());
+            $tags = $tagRepository->findBy(['id' => $tagIds]);
+            foreach ($tags as $tag) {
+                $post->addTag($tag);
+            }
             $postRepository->save($post, true);
-
             return $this->redirectToRoute('app_post_show', ['id' => $post->getAuthor()->getId()], Response::HTTP_SEE_OTHER);
         }
-
         return $this->renderForm('post/new.html.twig', [
-            'post' => $post,
-            'form' => $form,
+            'categories' => $categoryRepository->findAll(),
         ]);
+    }
+
+    #[Route('/favorite/{id}', name: 'app_favorite')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function favorite(Post $post, PostRepository $posts, Request $request): Response
+    {
+        $currentUser = $this->getUser();
+        $post->addAddedToFav($currentUser);
+        $posts->save($post, true);
+
+        return $this->redirect($request->headers->get('referer'));
+    }
+
+    #[Route('/unfavorite/{id}', name: 'app_unfavorite')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function unfavorite(Post $post, PostRepository $posts, Request $request): Response
+    {
+        $currentUser = $this->getUser();
+        $post->removeAddedToFav($currentUser);
+        $posts->save($post, true);
+
+        return $this->redirect($request->headers->get('referer'));
     }
 
     #[Route('/{id}', name: 'app_post_show', methods: ['GET'])]
@@ -57,20 +82,23 @@ class PostController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function edit(Request $request, Post $post, PostRepository $postRepository): Response
+    public function edit(Request $request, Post $post, PostRepository $postRepository, CategoryRepository $categoryRepository, TagRepository $tagRepository): Response
     {
-        $form = $this->createForm(PostType::class, $post);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($request->isMethod('POST')) {
+            $content = $request->request->get('content');
+            $parameters = $request->request->all();
+            $tagIds = $parameters['tags'];
+            $post->setContent($content);
+            $tags = $tagRepository->findBy(['id' => $tagIds]);
+            foreach ($tags as $tag) {
+                $post->addTag($tag);
+            }
             $postRepository->save($post, true);
-
             return $this->redirectToRoute('app_post_show', ['id' => $post->getAuthor()->getId()], Response::HTTP_SEE_OTHER);
         }
-
         return $this->renderForm('post/edit.html.twig', [
-            'post' => $post,
-            'form' => $form,
+            'categories' => $categoryRepository->findAll(),
+            'post'=> $post
         ]);
     }
 

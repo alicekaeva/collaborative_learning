@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[Route('/tag')]
 class TagController extends AbstractController
@@ -19,6 +20,22 @@ class TagController extends AbstractController
         return $this->render('tag/index.html.twig', [
             'tags' => $tagRepository->findAll(),
         ]);
+    }
+
+    #[Route('/get_tags/{categoryId}', name: 'app_get_tags', methods: ['GET'])]
+    public function getTags(int $categoryId, TagRepository $tagRepository): JsonResponse
+    {
+        $tags = $tagRepository->findBy(['category' => $categoryId]);
+
+        $tagData = [];
+        foreach ($tags as $tag) {
+            $tagData[] = [
+                'id' => $tag->getId(),
+                'name' => $tag->getName(),
+            ];
+        }
+
+        return new JsonResponse($tagData);
     }
 
     #[Route('/new', name: 'app_tag_new', methods: ['GET', 'POST'])]
