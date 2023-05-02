@@ -90,6 +90,12 @@ class PostController extends AbstractController
             $tagIds = $parameters['tags'];
             $post->setContent($content);
             $tags = $tagRepository->findBy(['id' => $tagIds]);
+            $postTags = $post->getTags();
+            foreach ($postTags as $postTag) {
+                if (!in_array($postTag->getId(), $tagIds)) {
+                    $post->removeTag($postTag);
+                }
+            }
             foreach ($tags as $tag) {
                 $post->addTag($tag);
             }
@@ -97,7 +103,6 @@ class PostController extends AbstractController
             return $this->redirectToRoute('app_post_show', ['id' => $post->getAuthor()->getId()], Response::HTTP_SEE_OTHER);
         }
         return $this->renderForm('post/edit.html.twig', [
-            'categories' => $categoryRepository->findAll(),
             'post'=> $post
         ]);
     }

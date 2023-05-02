@@ -16,16 +16,13 @@
                     <span class="label-text">Категория</span>
                 </label>
                 <select name='category' required class="select select-bordered">
-                    <option disabled selected>Выберите категорию</option>
-                    {% for category in categories %}
-                        <option value={{ category.id }}>{{ category.name }}</option>
-                    {% endfor %}
+                    <option disabled selected
+                            value={{ post.tags[0].category.id }}>{{ post.tags[0].category.name }}</option>
                 </select>
                 <label class="label">
                     <span class="label-text">Теги</span>
                 </label>
-                <select multiple name='tags' required class="select select-bordered overflow-hidden">
-                    <option disabled selected>Выберите категорию, чтобы увидеть теги</option>
+                <select multiple name='tags[]' required class="select select-bordered">
                 </select>
                 {% for tag in post.tags %}
                     <input type="hidden" name="tag_id" value="{{ tag.id }}">
@@ -36,7 +33,7 @@
     </div>
     <script>
         const categorySelect = document.querySelector('select[name="category"]');
-        const tagsSelect = document.querySelector('select[name="tags"]');
+        const tagsSelect = document.querySelector('select[name="tags[]"]');
         const chosenTags = document.querySelectorAll('input[name="tag_id"]');
         const tagIds = [];
 
@@ -44,23 +41,21 @@
             tagIds.push(parseInt(tag.value));
         });
 
-        categorySelect.addEventListener('change', (event) => {
-            const categoryId = event.target.value;
-            fetch(`/get_tags/${categoryId}`)
-                .then((response) => response.json())
-                .then((tags) => {
-                    tagsSelect.innerHTML = '';
-                    tags.forEach((tag) => {
-                        const option = document.createElement('option');
-                        option.value = tag.id;
-                        option.textContent = tag.name;
-                        if (tagIds.includes(tag.id)) {
-                            option.selected = true;
-                        }
-                        tagsSelect.appendChild(option);
-                    });
-                })
-                .catch((error) => console.error(error));
-        });
+        const categoryId = categorySelect.value;
+        fetch(`/get_tags/${categoryId}`)
+            .then((response) => response.json())
+            .then((tags) => {
+                tagsSelect.innerHTML = '';
+                tags.forEach((tag) => {
+                    const option = document.createElement('option');
+                    option.value = tag.id;
+                    option.textContent = tag.name;
+                    if (tagIds.includes(tag.id)) {
+                        option.selected = true;
+                    }
+                    tagsSelect.appendChild(option);
+                });
+            })
+            .catch((error) => console.error(error));
     </script>
 {% endblock %}
