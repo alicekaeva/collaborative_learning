@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -63,6 +64,16 @@ class MessageRepository extends ServiceEntityRepository
                 $first instanceof User ? $first->getId() : $first)
             ->setParameter('second',
                 $second instanceof User ? $second->getId() : $second)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findGroupChat(int|Group $receivingGroup): array
+    {
+        return $this->createQueryBuilder('m')
+            ->where('m.receivingGroup = :receivingGroup')
+            ->setParameter('receivingGroup',
+                $receivingGroup instanceof Group ? $receivingGroup->getId() : $receivingGroup)
             ->getQuery()
             ->getResult();
     }

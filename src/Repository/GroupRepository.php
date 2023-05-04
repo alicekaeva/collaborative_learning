@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Group;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -46,5 +47,19 @@ class GroupRepository extends ServiceEntityRepository
             ->join('t.category', 'c')
             ->getQuery()
             ->getResult();
+    }
+
+    public function findAllGroupsForUser(User $user)
+    {
+        $qb = $this->createQueryBuilder('g')
+            ->leftJoin('g.students', 's')
+            ->leftJoin('g.teachers', 't')
+            ->leftJoin('g.administrator', 'a')
+            ->where('s.user = :user')
+            ->orWhere('t.user = :user')
+            ->orWhere('a.user = :user')
+            ->setParameter('user', $user);
+
+        return $qb->getQuery()->getResult();
     }
 }
