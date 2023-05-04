@@ -24,14 +24,22 @@
                             <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
                         {% endfor %}
                         {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                            <div class="badge badge-outline">Студентов: {{ group.students.count }} из {{ group.requiredStudents }}</div>
-                            <div class="badge badge-outline">Преподавателей: {{ group.teachers.count }} из {{ group.requiredTeachers }}</div>
+                            <div class="badge badge-outline">Студентов: {{ group.students.count }}
+                                из {{ group.requiredStudents }}</div>
+                            <div class="badge badge-outline">Преподавателей: {{ group.teachers.count }}
+                                из {{ group.requiredTeachers }}</div>
                         {% endif %}
                     </div>
                     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
-                        <div>
-                            Вступить
-                        </div>
+                        {% set user_id = app.user.id %}
+                        {% set is_member = user_id in group.students|map(item => item.user.id)|merge(group.teachers|map(item => item.user.id))|merge([group.administrator.user.id]) %}
+                        {% if not is_member %}
+                            <form method="post" action="{{ path('app_group_enroll') }}">
+                                <input type="hidden" name="receiver_id" value="{{ group.administrator.user.id }}">
+                                <input type="hidden" name="group_name" value="{{ group.name }}">
+                                <button type="submit" class="badge badge-outline">Вступить</button>
+                            </form>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
