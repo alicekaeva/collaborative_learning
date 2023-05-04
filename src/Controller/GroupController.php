@@ -7,8 +7,10 @@ use App\Entity\Group;
 use App\Entity\Message;
 use App\Form\GroupType;
 use App\Repository\AdminRepository;
+use App\Repository\CategoryRepository;
 use App\Repository\GroupRepository;
 use App\Repository\MessageRepository;
+use App\Repository\TagRepository;
 use App\Repository\UserRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -29,13 +31,24 @@ class GroupController extends AbstractController
 
     #[Route('/new', name: 'app_group_new', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function new(Request $request, GroupRepository $groupRepository, AdminRepository $adminRepository, UserRepository $userRepository): Response
+    public function new(Request $request, GroupRepository $groupRepository, AdminRepository $adminRepository, UserRepository $userRepository, TagRepository $tagRepository, CategoryRepository $categoryRepository): Response
     {
-        $group = new Group();
-        $form = $this->createForm(GroupType::class, $group);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($request->isMethod('POST')) {
+            $name = $request->request->get('group_name');
+            $info = $request->request->get('info');
+            $teachers = $request->request->get('teachers');
+            $students = $request->request->get('students');
+            $parameters = $request->request->all();
+            $tagIds = $parameters['tags'];
+            $group = new Group();
+            $group->setName($name);
+            $group->setInfo($info);
+            $group->setRequiredTeachers($teachers);
+            $group->setRequiredStudents($students);
+            $tags = $tagRepository->findBy(['id' => $tagIds]);
+            foreach ($tags as $tag) {
+                $group->addTag($tag);
+            }
             $user = $this->getUser();
             $admin = $adminRepository->findOneBy(['user' => $user]);
             if (!$admin) {
@@ -49,13 +62,10 @@ class GroupController extends AbstractController
             }
             $group->setAdministrator($admin);
             $groupRepository->save($group, true);
-
             return $this->redirectToRoute('app_group_index', [], Response::HTTP_SEE_OTHER);
         }
-
         return $this->renderForm('group/new.html.twig', [
-            'group' => $group,
-            'form' => $form,
+            'categories' => $categoryRepository->findAll(),
         ]);
     }
 
@@ -64,7 +74,7 @@ class GroupController extends AbstractController
     {
         $user = $this->getUser();
         $receiverId = $request->request->get('receiver_id');
-        $receiver = $userRepository->findOneBy(['id'=>$receiverId]);
+        $receiver = $userRepository->findOneBy(['id' => $receiverId]);
         $groupName = $request->request->get('group_name');
         $content = 'Привет! Я хочу присоединиться к вашей группе ' . $groupName . '. Можешь добавить меня?';
 

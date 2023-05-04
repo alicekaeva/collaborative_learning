@@ -5,29 +5,31 @@
 {% block body %}
     <h1 class="ml-5 text-xl">Редактирование объявления</h1>
     <div class="flex flex-col w-96 m-5">
-        <div class="form-control w-full max-w-xs">
+        <div class="form-control w-full">
             <form method="post" action="{{ path('app_post_edit', {'id': post.id}) }}">
-                <label class="label">
-                    <span class="label-text">Описание</span>
+                <label class="block text-sm text-gray-700 font-medium" for="content">
+                    Описание
                 </label>
-                <textarea id="content" name="content"
-                          class="textarea textarea-bordered h-24">{{ post.content }}</textarea>
-                <label class="label">
-                    <span class="label-text">Категория</span>
+                <textarea id="content" name="content" required
+                          class="textarea textarea-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">{{ post.content }}</textarea>
+                <label class="block text-sm text-gray-700 font-medium" for="category">
+                    Категория
                 </label>
-                <select name='category' required class="select select-bordered">
+                <select id="category" name='category' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
                     <option disabled selected
                             value={{ post.tags[0].category.id }}>{{ post.tags[0].category.name }}</option>
                 </select>
-                <label class="label">
-                    <span class="label-text">Теги</span>
+                <label class="block text-sm text-gray-700 font-medium" for="tags">
+                    Теги
                 </label>
-                <select multiple name='tags[]' required class="select select-bordered">
+                <select id="tags" multiple name='tags[]' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
                 </select>
                 {% for tag in post.tags %}
                     <input type="hidden" name="tag_id" value="{{ tag.id }}">
                 {% endfor %}
-                <button type="submit" class="btn btn-outline w-full mt-3">Редактировать</button>
+                <button type="submit" class="btn btn-outline w-full">Редактировать</button>
             </form>
         </div>
     </div>
