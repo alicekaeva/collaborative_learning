@@ -3,7 +3,7 @@
 {% block title %}{{ user.fullName }}{% endblock %}
 
 {% block body %}
-    <div class="grid-cols-1">
+    <div class="grid-cols-1 m-2">
         <div class="flex">
             <div class="card card-side bg-base-100 shadow">
                 <figure class="w-16 ml-5">
@@ -24,12 +24,14 @@
                     <p class="text-gray-300">{{ user.email }}</p>
                 </div>
             </div>
-            <div class="stats shadow ml-10">
-                <div class="stat">
-                    <div class="stat-title">Количество очков</div>
-                    <div class="stat-value">{{ user.pointsAmount }}</div>
+            {% if user.pointsAmount %}
+                <div class="stats shadow ml-10">
+                    <div class="stat">
+                        <div class="stat-title">Количество очков</div>
+                        <div class="stat-value">{{ user.pointsAmount }}</div>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         </div>
         <table class="table mt-10">
             <tbody>
@@ -45,27 +47,29 @@
                 <th>Уровень образования</th>
                 <td>{{ user.almaMater }}</td>
             </tr>
-            <tr>
-                <th>Интересы</th>
-                <td>
-                    {% set categories = [] %}
-                    {% for tag in user.tags %}
-                        {% if tag.category.name not in categories %}
-                            {% set categories = categories|merge([tag.category.name]) %}
-                        {% endif %}
-                    {% endfor %}
-
-                    {% for category in categories %}
-                        <div class="badge badge-outline bg-green-200">{{ category }}</div>
-                        {% for tag in user.tags|filter(tag => tag.category.name == category) %}
-                            <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
+            {% if user.tags|length != 0 %}
+                <tr>
+                    <th>Интересы</th>
+                    <td>
+                        {% set categories = [] %}
+                        {% for tag in user.tags %}
+                            {% if tag.category.name not in categories %}
+                                {% set categories = categories|merge([tag.category.name]) %}
+                            {% endif %}
                         {% endfor %}
-                    {% endfor %}
-                </td>
-            </tr>
+
+                        {% for category in categories %}
+                            <div class="badge badge-outline bg-green-200">{{ category }}</div>
+                            {% for tag in user.tags|filter(tag => tag.category.name == category) %}
+                                <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
+                            {% endfor %}
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endif %}
             </tbody>
         </table>
-        {% if user.tags|length == 0 %}
+        {% if user.tags|length == 0 and user == app.user %}
             <div class="w-1/4 m-3 alert shadow-lg">
                 <div>
                     <i class="fa-solid fa-circle-info fa-xl"></i>

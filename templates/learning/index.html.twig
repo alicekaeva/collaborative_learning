@@ -17,23 +17,41 @@
             {% endfor %}
         </div>
         {% if activeGroup %}
-            <div class="w-2/4 flex flex-col justify-end items-center h-full border-r-2">
+            <div class="w-2/4 relative flex flex-col justify-end items-center h-full border-r-2">
                 {% if chat is not empty %}
+                    <div class="absolute left-0 top-0 tooltip tooltip-bottom m-3" data-tip="Закрепленные сообщения">
+                        <label for="my-modal-9" class="cursor-pointer"><i
+                                    class="fa-solid fa-bookmark fa-xl"></i></label>
+                    </div>
                     <div class="w-2/3 justify-end overflow-y-auto" id="myDiv2">
                         {% for message in chat %}
                             {% if message.sender == app.user %}
                                 <div class="chat chat-end">
                                     <div class="chat-header">
-                                        {{ message.sender.fullName }}
+                                        {% if message.isPinned %}
+                                            <a href="{{ path('app_unpin', { id: message.id }) }}"><i
+                                                        class="fa-solid fa-bookmark"></i></a>
+                                        {% else %}
+                                            <a href="{{ path('app_pin', { id: message.id }) }}"><i
+                                                        class="fa-regular fa-bookmark"></i></a>
+                                        {% endif %}
                                         <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                                        {{ message.sender.fullName }}
                                     </div>
                                     <div class="chat-bubble">{{ message.content }}</div>
                                 </div>
                             {% else %}
                                 <div class="chat chat-start">
                                     <div class="chat-header">
-                                        {{ message.sender.fullName }}
+                                        {% if message.isPinned %}
+                                            <a href="{{ path('app_unpin', { id: message.id }) }}"><i
+                                                        class="fa-solid fa-thumbtack"></i></a>
+                                        {% else %}
+                                            <a href="{{ path('app_pin', { id: message.id }) }}"><i
+                                                        class="fa-regular fa-thumbtack"></i></a>
+                                        {% endif %}
                                         <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                                        {{ message.sender.fullName }}
                                     </div>
                                     <div class="chat-bubble">{{ message.content }}</div>
                                 </div>
@@ -45,9 +63,9 @@
                     <input type="hidden" name="receiver_id" value="{{ activeGroup.id }}">
                     <div class="flex flex-row justify-center items-center mt-3 mb-1">
                         <input type="text" placeholder="Введите сообщение"
-                               class="input input-bordered w-full max-w-xs mr-3"
+                               class="input input-bordered w-full max-w-xs mx-3"
                                id="content" name="content" required/>
-                        <button type="submit"><i class="fa-regular fa-paper-plane fa-xl" style="color: #00333b;"></i>
+                        <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i>
                         </button>
                     </div>
                 </form>
@@ -81,22 +99,24 @@
                             <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-80">
                                 {% for student in activeGroup.students %}
                                     <li>
-                                        <a href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}</a>
+                                        <a href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}
+                                            (Студент)</a>
                                     </li>
                                 {% endfor %}
                                 {% for teacher in activeGroup.teachers %}
                                     <li>
-                                        <a href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}</a>
+                                        <a href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}
+                                            (Преподаватель)</a>
                                     </li>
                                 {% endfor %}
                                 <li>
-                                    <a href="{{ path('app_user_show', {'id': activeGroup.administrator.user.id}) }}">{{ activeGroup.administrator.user.fullName }}</a>
+                                    <a href="{{ path('app_user_show', {'id': activeGroup.administrator.user.id}) }}">{{ activeGroup.administrator.user.fullName }}
+                                        (Администратор)</a>
                                 </li>
                             </ul>
                         </div>
                         {% if app.user.id == activeGroup.administrator.user.id %}
-                            <label class="cursor-pointer" for="my-modal-7"><i class="fa-solid fa-circle-plus fa-xl"
-                                                                              style="color: #333b4d;"></i></label>
+                            <label class="cursor-pointer" for="my-modal-7"><i class="fa-solid fa-circle-plus fa-xl"></i></label>
                             <input type="checkbox" id="my-modal-7" class="modal-toggle"/>
                             <div class="modal">
                                 <div class="modal-box relative">
@@ -148,6 +168,16 @@
             </div>
         {% endif %}
     </div>
+    <input type="checkbox" id="my-modal-9" class="modal-toggle"/>
+    <label for="my-modal-9" class="modal cursor-pointer">
+        <label class="modal-box relative" for="">
+            {% for message in chat %}
+                {% if message.isPinned %}
+                    <div class="bg-base-200 my-2 rounded">{{ message.content }}</div>
+                {% endif %}
+            {% endfor %}
+        </label>
+    </label>
     <script>
         const myDiv = document.getElementById("myDiv2");
         myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;

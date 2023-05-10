@@ -64,6 +64,24 @@ class MessageController extends AbstractController
         return $this->redirectToRoute('app_message_show', ['id' => $receiverId]);
     }
 
+    #[Route('/pin/{id}', name: 'app_pin')]
+    public function pin(Message $message, MessageRepository $messageRepository, Request $request): Response
+    {
+        $message->setIsPinned(true);
+        $messageRepository->save($message, true);
+
+        return $this->redirect($request->headers->get('referer'));
+    }
+
+    #[Route('/unpin/{id}', name: 'app_unpin')]
+    public function unpin(Message $message, MessageRepository $messageRepository, Request $request): Response
+    {
+        $message->setIsPinned(false);
+        $messageRepository->save($message, true);
+
+        return $this->redirect($request->headers->get('referer'));
+    }
+
     #[Route('/dialog/{id}', name: 'app_message_show', methods: ['GET'])]
     public function show(MessageRepository $messageRepository, User $receiver): Response
     {

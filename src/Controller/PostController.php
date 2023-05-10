@@ -21,7 +21,7 @@ class PostController extends AbstractController
     public function index(PostRepository $postRepository): Response
     {
         $user = $this->getUser();
-        if ($user && $user->getTags()){
+        if ($user && $user->getTags()->count() > 0){
             $posts = $postRepository->findPostsByTags($user->getTags()->toArray());
         } else {
             $posts = $postRepository->findAll();

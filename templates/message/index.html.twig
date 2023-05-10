@@ -26,16 +26,16 @@
                 {% if message.sender == app.user %}
                     <div class="chat chat-end">
                         <div class="chat-header">
-                            {{ message.sender.fullName }}
                             <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                            {{ message.sender.fullName }}
                         </div>
                         <div class="chat-bubble">{{ message.content }}</div>
                     </div>
                 {% else %}
                     <div class="chat chat-start">
                         <div class="chat-header">
-                            {{ message.sender.fullName }}
                             <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                            {{ message.sender.fullName }}
                         </div>
                         <div class="chat-bubble">{{ message.content }}</div>
                     </div>
@@ -48,7 +48,7 @@
             <div class="flex flex-row justify-center items-center mt-3 mb-1">
                 <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-xs mr-3"
                        id="content" name="content" required/>
-                <button type="submit"><i class="fa-regular fa-paper-plane fa-xl" style="color: #00333b;"></i></button>
+                <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i></button>
             </div>
         </form>
         </div>
