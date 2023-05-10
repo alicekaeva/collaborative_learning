@@ -28,7 +28,6 @@ class UserType extends AbstractType
                     'Магистратура' => 'Магистратура'
                 ],
             ])
-            ->add('interests', TextType::class)
         ;
     }
 

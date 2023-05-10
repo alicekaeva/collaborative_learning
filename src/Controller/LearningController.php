@@ -45,7 +45,7 @@ class LearningController extends AbstractController
             'groups' => $groups,
             'activeGroup' => $receivingGroup,
             'chat' => $chat,
-            'users' => $userRepository->findAll() // todo показывать тех кого нет в группе
+            'users' => $userRepository->findAll()
         ]);
     }
 
@@ -101,7 +101,6 @@ class LearningController extends AbstractController
             }
             $group->addStudent($student);
             $groupRepository->save($group, true);
-            // todo сделать проверку на requiredStudents и requiredTeachers
         }
         return $this->redirectToRoute('app_learning_show', ['id' => $groupId]);
     }

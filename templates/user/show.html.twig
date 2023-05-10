@@ -47,9 +47,34 @@
             </tr>
             <tr>
                 <th>Интересы</th>
-                <td>{{ user.interests }}</td>
+                <td>
+                    {% set categories = [] %}
+                    {% for tag in user.tags %}
+                        {% if tag.category.name not in categories %}
+                            {% set categories = categories|merge([tag.category.name]) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% for category in categories %}
+                        <div class="badge badge-outline bg-green-200">{{ category }}</div>
+                        {% for tag in user.tags|filter(tag => tag.category.name == category) %}
+                            <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
+                        {% endfor %}
+                    {% endfor %}
+                </td>
             </tr>
             </tbody>
         </table>
+        {% if user.tags|length == 0 %}
+            <div class="w-1/4 m-3 alert shadow-lg">
+                <div>
+                    <i class="fa-solid fa-circle-info fa-xl"></i>
+                    <span>Чтобы получать более точные рекомендации по интересующим категориям и тегам, укажите Ваши интересы</span>
+                </div>
+                <div class="flex-none">
+                    <a class="btn btn-sm" href="{{ path('app_user_edit', {'id': app.user.id}) }}">Перейти</a>
+                </div>
+            </div>
+        {% endif %}
     </div>
 {% endblock %}

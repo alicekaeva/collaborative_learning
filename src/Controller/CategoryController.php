@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use function Symfony\Component\Translation\t;
 
 #[Route('/category')]
 class CategoryController extends AbstractController
@@ -24,20 +25,16 @@ class CategoryController extends AbstractController
     #[Route('/new', name: 'app_category_new', methods: ['GET', 'POST'])]
     public function new(Request $request, CategoryRepository $categoryRepository): Response
     {
-        $category = new Category();
-        $form = $this->createForm(CategoryType::class, $category);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $categoryRepository->save($category, true);
-
-            return $this->redirectToRoute('app_category_index', [], Response::HTTP_SEE_OTHER);
+        if ($request->isMethod('POST')) {
+            $name = $request->request->get('new_category');
+            $category = $categoryRepository->findBy(['name' => $name]);
+            if (!$category) {
+                $category = new Category();
+                $category->setName($name);
+                $categoryRepository->save($category, true);
+            }
         }
-
-        return $this->renderForm('category/new.html.twig', [
-            'category' => $category,
-            'form' => $form,
-        ]);
+        return $this->redirect($request->headers->get('referer'));
     }
 
     #[Route('/{id}', name: 'app_category_show', methods: ['GET'])]
@@ -69,7 +66,7 @@ class CategoryController extends AbstractController
     #[Route('/{id}', name: 'app_category_delete', methods: ['POST'])]
     public function delete(Request $request, Category $category, CategoryRepository $categoryRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$category->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $category->getId(), $request->request->get('_token'))) {
             $categoryRepository->remove($category, true);
         }
 

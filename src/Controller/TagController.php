@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Tag;
 use App\Form\TagType;
+use App\Repository\CategoryRepository;
 use App\Repository\TagRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -39,22 +40,21 @@ class TagController extends AbstractController
     }
 
     #[Route('/new', name: 'app_tag_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, TagRepository $tagRepository): Response
+    public function new(Request $request, TagRepository $tagRepository, CategoryRepository $categoryRepository): Response
     {
-        $tag = new Tag();
-        $form = $this->createForm(TagType::class, $tag);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $tagRepository->save($tag, true);
-
-            return $this->redirectToRoute('app_tag_index', [], Response::HTTP_SEE_OTHER);
+        if ($request->isMethod('POST')) {
+            $name = $request->request->get('new_tag');
+            $category_id = $request->request->get('category');
+            $category = $categoryRepository->findOneBy(['id' => $category_id]);
+            $tag = $tagRepository->findBy(['name' => $name]);
+            if (!$tag) {
+                $tag = new Tag();
+                $tag->setName($name);
+                $tag->setCategory($category);
+                $tagRepository->save($tag, true);
+            }
         }
-
-        return $this->renderForm('tag/new.html.twig', [
-            'tag' => $tag,
-            'form' => $form,
-        ]);
+        return $this->redirect($request->headers->get('referer'));
     }
 
     #[Route('/{id}', name: 'app_tag_show', methods: ['GET'])]

@@ -5,20 +5,42 @@
 
 {% block body %}
     <div class="flex flex-row border-y-2" style="height: calc(100vh - 69px)">
-    <div class="w-1/4 flex flex-col justify-start items-center overflow-y-auto border-r-2">
-        {% for group in groups %}
-            <div class="card w-96
+        <div class="w-1/4 flex flex-col justify-start items-center overflow-y-auto border-r-2">
+            {% for group in groups %}
+                <div class="card w-96
                 {% if activeGroup and activeGroup.name == group.name %}bg-base-200{% else %}bg-base-100{% endif %} shadow m-3">
-                <div class="card-body">
-                    <a href="{{ path('app_learning_show', {'id': group.id}) }}"
-                       class="card-title">{{ group.name }}</a>
+                    <div class="card-body">
+                        <a href="{{ path('app_learning_show', {'id': group.id}) }}"
+                           class="card-title">{{ group.name }}</a>
+                    </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
-    {% if activeGroup %}
-        {% if chat is empty %}
+            {% endfor %}
+        </div>
+        {% if activeGroup %}
             <div class="w-2/4 flex flex-col justify-end items-center h-full border-r-2">
+                {% if chat is not empty %}
+                    <div class="w-2/3 justify-end overflow-y-auto" id="myDiv2">
+                        {% for message in chat %}
+                            {% if message.sender == app.user %}
+                                <div class="chat chat-end">
+                                    <div class="chat-header">
+                                        {{ message.sender.fullName }}
+                                        <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                                    </div>
+                                    <div class="chat-bubble">{{ message.content }}</div>
+                                </div>
+                            {% else %}
+                                <div class="chat chat-start">
+                                    <div class="chat-header">
+                                        {{ message.sender.fullName }}
+                                        <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                                    </div>
+                                    <div class="chat-bubble">{{ message.content }}</div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <form method="post" action="{{ path('app_learning_send') }}" class="w-2/3">
                     <input type="hidden" name="receiver_id" value="{{ activeGroup.id }}">
                     <div class="flex flex-row justify-center items-center mt-3 mb-1">
@@ -30,90 +52,102 @@
                     </div>
                 </form>
             </div>
+            <div class="w-1/4 flex flex-col justify-start items-center h-full">
+                <div class="card card-side bg-base-100 shadow w-4/5">
+                    <div class="card-body">
+                        <p class="card-title">{{ activeGroup.info }}</p>
+                        <div class="card-actions flex justify-between">
+                            <div>
+                                <div class="badge badge-outline bg-green-200">{{ activeGroup.tags[0].category.name }}</div>
+                                {% for tag in activeGroup.tags %}
+                                    <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
+                                {% endfor %}
+                                <div class="badge badge-outline">Студентов: {{ activeGroup.students.count }}
+                                    из {{ activeGroup.requiredStudents }}</div>
+                                <div class="badge badge-outline">Преподавателей: {{ activeGroup.teachers.count }}
+                                    из {{ activeGroup.requiredTeachers }}</div>
+                                {% if app.user.id == activeGroup.administrator.user.id %}
+                                    <a class="badge badge-outline bg-red-200"
+                                       href="{{ path('app_group_edit', {'id': activeGroup.id}) }}">Редактировать</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-4/5 mt-2">
+                    <div class="flex flex-row justify-center items-center">
+                        <div class="dropdown dropdown-end">
+                            <label tabindex="0" class="btn m-1">Участники</label>
+                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-80">
+                                {% for student in activeGroup.students %}
+                                    <li>
+                                        <a href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}</a>
+                                    </li>
+                                {% endfor %}
+                                {% for teacher in activeGroup.teachers %}
+                                    <li>
+                                        <a href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}</a>
+                                    </li>
+                                {% endfor %}
+                                <li>
+                                    <a href="{{ path('app_user_show', {'id': activeGroup.administrator.user.id}) }}">{{ activeGroup.administrator.user.fullName }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% if app.user.id == activeGroup.administrator.user.id %}
+                            <label class="cursor-pointer" for="my-modal-7"><i class="fa-solid fa-circle-plus fa-xl"
+                                                                              style="color: #333b4d;"></i></label>
+                            <input type="checkbox" id="my-modal-7" class="modal-toggle"/>
+                            <div class="modal">
+                                <div class="modal-box relative">
+                                    <label for="my-modal-7"
+                                           class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                    <h3 class="text-lg font-bold">Добавить участника</h3>
+                                    <form method="post" action="{{ path('app_learning_add_user') }}">
+                                        <input type="hidden" name="group_id" value="{{ activeGroup.id }}">
+                                        <select name="user"
+                                                class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                                                required>
+                                            <option disabled selected>Выберите пользователя</option>
+                                            {% for user in users %}
+                                                {% set user_id = user.id %}
+                                                {% set is_member = user_id in activeGroup.students|map(item => item.user.id)|merge(activeGroup.teachers|map(item => item.user.id))|merge([activeGroup.administrator.user.id]) %}
+                                                {% if not is_member %}
+                                                    <option value={{ user.id }}>{{ user.fullName }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </select>
+                                        <select name="role"
+                                                class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                                                required>
+                                            <option disabled selected>Выберите роль</option>
+                                            <option value="teacher"
+                                                    {% if activeGroup.teachers.count >= activeGroup.requiredTeachers %}
+                                                        disabled
+                                                    {% endif %}
+                                            >Преподаватель
+                                            </option>
+                                            <option value="student"
+                                                    {% if activeGroup.students.count >= activeGroup.requiredStudents %}
+                                                        disabled
+                                                    {% endif %}
+                                            >Студент
+                                            </option>
+                                        </select>
+                                        <button type="submit" class="btn btn-outline">Добавить</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         {% else %}
-            <div class="w-2/4 flex flex-col justify-end items-center h-full border-r-2">
-            <div class="w-2/3 justify-end overflow-y-auto" id="myDiv2">
-            {% for message in chat %}
-                {% if message.sender == app.user %}
-                    <div class="chat chat-end">
-                        <div class="chat-header">
-                            {{ message.sender.fullName }}
-                            <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
-                        </div>
-                        <div class="chat-bubble">{{ message.content }}</div>
-                    </div>
-                {% else %}
-                    <div class="chat chat-start">
-                        <div class="chat-header">
-                            {{ message.sender.fullName }}
-                            <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
-                        </div>
-                        <div class="chat-bubble">{{ message.content }}</div>
-                    </div>
-                {% endif %}
-            {% endfor %}
+            <div class="w-3/4 flex justify-center items-center h-full text-2xl">
+                Выберите группу.
+            </div>
         {% endif %}
-        </div>
-        <form method="post" action="{{ path('app_learning_send') }}" class="w-2/3">
-            <input type="hidden" name="receiver_id" value="{{ activeGroup.id }}">
-            <div class="flex flex-row justify-center items-center mt-3 mb-1">
-                <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-xs mr-3"
-                       id="content" name="content" required/>
-                <button type="submit"><i class="fa-regular fa-paper-plane fa-xl" style="color: #00333b;"></i>
-                </button>
-            </div>
-        </form>
-        </div>
-        <div class="w-1/4 flex flex-col justify-start items-center h-full">
-            <div class="card card-side bg-base-100 shadow w-4/5">
-                <div class="card-body">
-                    <p class="card-title">{{ activeGroup.info }}</p>
-                    <div class="card-actions flex justify-between">
-                        <div>
-                            <div class="badge badge-outline bg-green-200">{{ activeGroup.tags[0].category.name }}</div>
-                            {% for tag in activeGroup.tags %}
-                                <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
-                            {% endfor %}
-                            <div class="badge badge-outline">Студентов: {{ activeGroup.students.count }}
-                                из {{ activeGroup.requiredStudents }}</div>
-                            <div class="badge badge-outline">Преподавателей: {{ activeGroup.teachers.count }}
-                                из {{ activeGroup.requiredTeachers }}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="w-4/5 mt-2">
-                <div class="flex flex-row">
-                    <span class="text-lg font-semibold mr-3">Участники</span>
-                    <div class="dropdown dropdown-bottom">
-                        <label tabindex="0"><i class="fa-solid fa-circle-plus fa-lg" style="color: #333b4d;"></i></label>
-                        <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-80">
-                            <form method="post" action="{{ path('app_learning_add_user') }}">
-                                <input type="hidden" name="group_id" value="{{ activeGroup.id }}">
-                                <select name="user" class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2" required>
-                                    <option disabled selected>Выберите пользователя</option>
-                                    {% for user in users %}
-                                        <option value={{ user.id }}>{{ user.fullName }}</option>
-                                    {% endfor %}
-                                </select>
-                                <select name="role" class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2" required>
-                                    <option disabled selected>Выберите роль</option>
-                                    <option value="teacher">Преподаватель</option>
-                                    <option value="student">Студент</option>
-                                </select>
-                                <button type="submit" class="btn btn-outline">Добавить</button>
-                            </form>
-                        </ul>
-                    </div>
-                    <label for="my-modal" class="cursor-pointer"></label>
-                </div>
-            </div>
-        </div>
-    {% else %}
-        <div class="w-3/4 flex justify-center items-center h-full text-2xl">
-            Выберите группу.
-        </div>
-    {% endif %}
+    </div>
     <script>
         const myDiv = document.getElementById("myDiv2");
         myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;

@@ -60,14 +60,13 @@ class PostRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+    public function findPostsByTags(array $tags)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->join('p.tags', 't')
+            ->where('t IN (:tags)')
+            ->setParameter('tags', $tags);
 
-//    public function findOneBySomeField($value): ?Post
-//    {
-//        return $this->createQueryBuilder('p')
-//            ->andWhere('p.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+        return $qb->getQuery()->getResult();
+    }
 }

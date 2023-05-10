@@ -20,8 +20,14 @@ class PostController extends AbstractController
     #[Route('/', name: 'app_post_index', methods: ['GET'])]
     public function index(PostRepository $postRepository): Response
     {
+        $user = $this->getUser();
+        if ($user && $user->getTags()){
+            $posts = $postRepository->findPostsByTags($user->getTags()->toArray());
+        } else {
+            $posts = $postRepository->findAll();
+        }
         return $this->render('post/index.html.twig', [
-            'posts' => $postRepository->findAll(),
+            'posts' => $posts,
         ]);
     }
 

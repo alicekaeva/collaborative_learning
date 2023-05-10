@@ -31,12 +31,41 @@
             {{ form_widget(form.almaMater, {'attr': {'class': 'block w-full shadow-sm border-gray-300 h-11 rounded-md border p-2 mt-1 mb-2'}}) }}
             {{ form_errors(form.almaMater) }}
         </div>
-        <div>
-            {{ form_label(form.interests, 'Интересы', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
-            {{ form_widget(form.interests, {'attr': {'class': 'block w-full shadow-sm border-gray-300 h-11 rounded-md border p-2 mt-1 mb-2'}}) }}
-            {{ form_errors(form.interests) }}
+        <div class="flex flex-row justify-between">
+            <label class="block text-sm text-gray-700 font-medium" for="tags">
+                Теги
+            </label>
+            <label class="cursor-pointer" for="my-modal-8"><i class="fa-solid fa-circle-plus fa-xl"
+                                       style="color: #333b4d;"></i></label>
         </div>
+        <select multiple id="tags" name='tags[]' required
+                class="select block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+            {% for tag in tags %}
+                <option
+                        {% if tag in user.tags %}
+                            selected
+                        {% endif %}
+                        value={{ tag.id }}> {{ tag.name }}(Категория: {{ tag.category.name }})</option>
+            {% endfor %}
+        </select>
         <button class="btn btn-outline w-full">Сохранить изменения</button>
     </div>
     {{ form_end(form) }}
+    <input type="checkbox" id="my-modal-8" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="my-modal-8" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить тег</h3>
+            <form method="post" action="{{ path('app_tag_new') }}">
+                <select name='category' class="select select-bordered w-full mt-2 max-w-xs">
+                    <option disabled selected>Выберите категорию</option>
+                    {% for category in categories %}
+                        <option value={{ category.id }}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <button type="submit" class="btn btn-outline">Добавить</button>
+            </form>
+        </div>
+    </div>
 {% endblock %}

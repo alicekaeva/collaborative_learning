@@ -98,20 +98,34 @@ class GroupController extends AbstractController
 
     #[Route('/{id}/edit', name: 'app_group_edit', methods: ['GET', 'POST'])]
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function edit(Request $request, Group $group, GroupRepository $groupRepository): Response
+    public function edit(Request $request, Group $group, GroupRepository $groupRepository, TagRepository $tagRepository): Response
     {
-        $form = $this->createForm(GroupType::class, $group);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($request->isMethod('POST')) {
+            $name = $request->request->get('group_name');
+            $info = $request->request->get('info');
+            $teachers = $request->request->get('teachers');
+            $students = $request->request->get('students');
+            $parameters = $request->request->all();
+            $tagIds = $parameters['tags'];
+            $group->setName($name);
+            $group->setInfo($info);
+            $group->setRequiredTeachers($teachers);
+            $group->setRequiredStudents($students);
+            $tags = $tagRepository->findBy(['id' => $tagIds]);
+            $groupTags = $group->getTags();
+            foreach ($groupTags as $groupTag) {
+                if (!in_array($groupTag->getId(), $tagIds)) {
+                    $group->removeTag($groupTag);
+                }
+            }
+            foreach ($tags as $tag) {
+                $group->addTag($tag);
+            }
             $groupRepository->save($group, true);
-
-            return $this->redirectToRoute('app_group_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_learning_show', ['id' => $group->getId()], Response::HTTP_SEE_OTHER);
         }
-
         return $this->renderForm('group/edit.html.twig', [
-            'group' => $group,
-            'form' => $form,
+            'group'=> $group
         ]);
     }
 

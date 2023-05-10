@@ -20,16 +20,32 @@
                     <option disabled selected
                             value={{ post.tags[0].category.id }}>{{ post.tags[0].category.name }}</option>
                 </select>
-                <label class="block text-sm text-gray-700 font-medium" for="tags">
-                    Теги
-                </label>
+                <div class="flex flex-row justify-between">
+                    <label class="block text-sm text-gray-700 font-medium" for="tags">
+                        Теги
+                    </label>
+                    <label for="my-modal-5"><i class="fa-solid fa-circle-plus fa-xl"
+                                               style="color: #333b4d;"></i></label>
+                </div>
                 <select id="tags" multiple name='tags[]' required
                         class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
                 </select>
                 {% for tag in post.tags %}
                     <input type="hidden" name="tag_id" value="{{ tag.id }}">
                 {% endfor %}
-                <button type="submit" class="btn btn-outline w-full">Редактировать</button>
+                <button type="submit" class="btn btn-outline w-full">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="my-modal-5" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="my-modal-5" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить тег</h3>
+            <form method="post" action="{{ path('app_tag_new') }}">
+                <input type="hidden" name="category" value="{{ post.tags[0].category.id }}">
+                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <button type="submit" class="btn btn-outline">Добавить</button>
             </form>
         </div>
     </div>
