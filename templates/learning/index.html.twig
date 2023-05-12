@@ -7,7 +7,7 @@
     <div class="flex flex-row border-y-2" style="height: calc(100vh - 69px)">
         <div class="w-1/4 flex flex-col justify-start items-center overflow-y-auto border-r-2">
             {% for group in groups %}
-                <div class="card w-96
+                <div class="card w-80
                 {% if activeGroup and activeGroup.name == group.name %}bg-base-200{% else %}bg-base-100{% endif %} shadow m-3">
                     <div class="card-body">
                         <a href="{{ path('app_learning_show', {'id': group.id}) }}"
@@ -23,6 +23,16 @@
                         <label for="my-modal-9" class="cursor-pointer"><i
                                     class="fa-solid fa-bookmark fa-xl"></i></label>
                     </div>
+                    <input type="checkbox" id="my-modal-9" class="modal-toggle"/>
+                    <label for="my-modal-9" class="modal cursor-pointer">
+                        <label class="modal-box relative" for="">
+                            {% for message in chat %}
+                                {% if message.isPinned %}
+                                    <div class="pinned bg-base-200 my-2 rounded">{{ message.content|markdown_to_html|sanitize_html }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </label>
+                    </label>
                     <div class="w-2/3 justify-end overflow-y-auto" id="myDiv2">
                         {% for message in chat %}
                             {% if message.sender == app.user %}
@@ -38,7 +48,7 @@
                                         <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
                                         {{ message.sender.fullName }}
                                     </div>
-                                    <div class="chat-bubble">{{ message.content }}</div>
+                                    <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
                                 </div>
                             {% else %}
                                 <div class="chat chat-start">
@@ -53,7 +63,7 @@
                                         <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
                                         {{ message.sender.fullName }}
                                     </div>
-                                    <div class="chat-bubble">{{ message.content }}</div>
+                                    <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
                                 </div>
                             {% endif %}
                         {% endfor %}
@@ -61,9 +71,8 @@
                 {% endif %}
                 <form method="post" action="{{ path('app_learning_send') }}" class="w-2/3">
                     <input type="hidden" name="receiver_id" value="{{ activeGroup.id }}">
-                    <div class="flex flex-row justify-center items-center mt-3 mb-1">
-                        <input type="text" placeholder="Введите сообщение"
-                               class="input input-bordered w-full max-w-xs mx-3"
+                    <div class="flex justify-center items-center mt-3 mb-1">
+                        <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-lg mr-3"
                                id="content" name="content" required/>
                         <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i>
                         </button>
@@ -84,7 +93,7 @@
                                     из {{ activeGroup.requiredStudents }}</div>
                                 <div class="badge badge-outline">Преподавателей: {{ activeGroup.teachers.count }}
                                     из {{ activeGroup.requiredTeachers }}</div>
-                                {% if app.user.id == activeGroup.administrator.user.id %}
+                                {% if app.user == activeGroup.administrator.user %}
                                     <a class="badge badge-outline bg-red-200"
                                        href="{{ path('app_group_edit', {'id': activeGroup.id}) }}">Редактировать</a>
                                 {% endif %}
@@ -115,7 +124,7 @@
                                 </li>
                             </ul>
                         </div>
-                        {% if app.user.id == activeGroup.administrator.user.id %}
+                        {% if app.user == activeGroup.administrator.user %}
                             <label class="cursor-pointer" for="my-modal-7"><i class="fa-solid fa-circle-plus fa-xl"></i></label>
                             <input type="checkbox" id="my-modal-7" class="modal-toggle"/>
                             <div class="modal">
@@ -168,18 +177,15 @@
             </div>
         {% endif %}
     </div>
-    <input type="checkbox" id="my-modal-9" class="modal-toggle"/>
-    <label for="my-modal-9" class="modal cursor-pointer">
-        <label class="modal-box relative" for="">
-            {% for message in chat %}
-                {% if message.isPinned %}
-                    <div class="bg-base-200 my-2 rounded">{{ message.content }}</div>
-                {% endif %}
-            {% endfor %}
-        </label>
-    </label>
     <script>
         const myDiv = document.getElementById("myDiv2");
         myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;
+    </script>
+    <script>
+        // get the h1 element
+        const h1 = document.querySelector('h1');
+
+        // add a class to the h1 element
+        h1.classList.add('text-2xl', 'font-bold', 'my-class');
     </script>
 {% endblock %}

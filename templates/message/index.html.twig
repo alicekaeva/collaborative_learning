@@ -29,7 +29,7 @@
                             <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
                             {{ message.sender.fullName }}
                         </div>
-                        <div class="chat-bubble">{{ message.content }}</div>
+                        <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
                     </div>
                 {% else %}
                     <div class="chat chat-start">
@@ -37,7 +37,7 @@
                             <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
                             {{ message.sender.fullName }}
                         </div>
-                        <div class="chat-bubble">{{ message.content }}</div>
+                        <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
                     </div>
                 {% endif %}
             {% endfor %}
@@ -46,7 +46,7 @@
         <form method="post" action="{{ path('app_message_send') }}" class="w-2/3">
             <input type="hidden" name="receiver_id" value="{{ activeUser.id }}">
             <div class="flex flex-row justify-center items-center mt-3 mb-1">
-                <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-xs mr-3"
+                <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-lg mr-3"
                        id="content" name="content" required/>
                 <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i></button>
             </div>

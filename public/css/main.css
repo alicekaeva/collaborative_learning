@@ -1,0 +1,77 @@
+.chat-bubble h1 {
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.chat-bubble h2 {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.chat-bubble li {
+    display: list-item;
+}
+
+.chat-bubble ol {
+    display: block;
+    list-style-type: decimal;
+    padding-left: 40px;
+}
+
+.chat-bubble ul {
+    display: block;
+    list-style-type: disc;
+    padding-left: 40px;
+}
+
+.chat-bubble a {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.chat-bubble a:visited {
+    color: mediumpurple;
+    text-decoration: underline;
+    cursor: auto;
+}
+
+.pinned h1 {
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.pinned h2 {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.pinned li {
+    display: list-item;
+}
+
+.pinned ol {
+    display: block;
+    list-style-type: decimal;
+    padding-left: 40px;
+}
+
+.pinned ul {
+    display: block;
+    list-style-type: disc;
+    padding-left: 40px;
+}
+
+.pinned a {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.pinned a:visited {
+    color: mediumpurple;
+    text-decoration: underline;
+    cursor: auto;
+}
