@@ -4,19 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Group;
 use App\Entity\Message;
-use App\Entity\Student;
-use App\Entity\Teacher;
-use App\Entity\User;
 use App\Repository\GroupRepository;
 use App\Repository\MessageRepository;
-use App\Repository\StudentRepository;
-use App\Repository\TeacherRepository;
 use App\Repository\UserRepository;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Cookie;
 
 #[Route('/learning')]
 #[IsGranted('IS_AUTHENTICATED_FULLY')]
@@ -41,12 +37,21 @@ class LearningController extends AbstractController
         $groups = $groupRepository->findAllGroupsForUser($user);
         $chat = $messageRepository->findGroupChat($receivingGroup);
 
-        return $this->render('learning/index.html.twig', [
+        $cookie = Cookie::create('currentGroup')
+            ->withValue($receivingGroup->getId())
+            ->withExpires(new \DateTime('+1 day'))
+            ->withSecure(true)
+            ->withHttpOnly(true);
+
+        $response = $this->render('learning/index.html.twig', [
             'groups' => $groups,
             'activeGroup' => $receivingGroup,
             'chat' => $chat,
             'users' => $userRepository->findAll()
         ]);
+        $response->headers->setCookie($cookie);
+
+        return $response;
     }
 
     #[Route('/send', name: 'app_learning_send', methods: ['POST'])]
@@ -65,43 +70,5 @@ class LearningController extends AbstractController
         $messageRepository->save($message, true);
 
         return $this->redirectToRoute('app_learning_show', ['id' => $receiverId]);
-    }
-
-    #[Route('/add_user', name: 'app_learning_add_user', methods: ['POST'])]
-    public function addUserToGroup(Request $request, TeacherRepository $teacherRepository, StudentRepository $studentRepository, UserRepository $userRepository, GroupRepository $groupRepository): Response
-    {
-        $groupId = $request->request->get('group_id');
-        $group = $groupRepository->findOneBy(['id' => $groupId]);
-        $userId = $request->request->get('user');
-        $user = $userRepository->findOneBy(['id' => $userId]);
-        $role = $request->request->get('role');
-        if ($role == 'teacher'){
-            $teacher = $teacherRepository->findOneBy(['user' => $user]);
-            if (!$teacher) {
-                $teacher = new Teacher();
-                $teacher->setUser($user);
-                $teacherRepository->save($teacher, true);
-                $userRoles = $user->getRoles();
-                $userRoles[] = 'ROLE_TEACHER';
-                $user->setRoles($userRoles);
-                $userRepository->save($user, true);
-            }
-            $group->addTeacher($teacher);
-            $groupRepository->save($group, true);
-        } elseif ($role == 'student'){
-            $student = $studentRepository->findOneBy(['user' => $user]);
-            if (!$student) {
-                $student = new Student();
-                $student->setUser($user);
-                $studentRepository->save($student, true);
-                $userRoles = $user->getRoles();
-                $userRoles[] = 'ROLE_STUDENT';
-                $user->setRoles($userRoles);
-                $userRepository->save($user, true);
-            }
-            $group->addStudent($student);
-            $groupRepository->save($group, true);
-        }
-        return $this->redirectToRoute('app_learning_show', ['id' => $groupId]);
     }
 }
