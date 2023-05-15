@@ -55,10 +55,10 @@
                                     <div class="chat-header">
                                         {% if message.isPinned %}
                                             <a href="{{ path('app_unpin', { id: message.id }) }}"><i
-                                                        class="fa-solid fa-thumbtack"></i></a>
+                                                        class="fa-solid fa-bookmark"></i></a>
                                         {% else %}
                                             <a href="{{ path('app_pin', { id: message.id }) }}"><i
-                                                        class="fa-regular fa-thumbtack"></i></a>
+                                                        class="fa-regular fa-bookmark"></i></a>
                                         {% endif %}
                                         <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
                                         {{ message.sender.fullName }}
@@ -72,7 +72,8 @@
                 <form method="post" action="{{ path('app_learning_send') }}" class="w-2/3">
                     <input type="hidden" name="receiver_id" value="{{ activeGroup.id }}">
                     <div class="flex justify-center items-center mt-3 mb-1">
-                        <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-lg mr-3"
+                        <input type="text" placeholder="Введите сообщение"
+                               class="input input-bordered w-full max-w-lg mr-3"
                                id="content" name="content" required/>
                         <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i>
                         </button>
@@ -94,82 +95,85 @@
                                 <div class="badge badge-outline">Преподавателей: {{ activeGroup.teachers.count }}
                                     из {{ activeGroup.requiredTeachers }}</div>
                                 {% if app.user == activeGroup.administrator.user %}
-                                    <a class="badge badge-outline bg-red-200"
-                                       href="{{ path('app_group_edit', {'id': activeGroup.id}) }}">Редактировать</a>
+                                    <a class="badge badge-outline bg-yellow-200"
+                                       href="{{ path('app_group_edit', {'id': activeGroup.id}) }}">Редактировать
+                                        группу</a>
+                                    <a class="badge badge-outline bg-orange-200"
+                                       href="{{ path('app_group_management', {'id': activeGroup.id}) }}">Управление
+                                        участниками
+                                        группы</a>
+                                    {{ include('group/_delete_form.html.twig') }}
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="w-4/5 mt-2">
-                    <div class="flex flex-row justify-center items-center">
-                        <div class="dropdown dropdown-end">
-                            <label tabindex="0" class="btn m-1">Участники</label>
-                            <ul tabindex="0" class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-80">
-                                {% for student in activeGroup.students %}
-                                    <li>
-                                        <a href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}
-                                            (Студент)</a>
-                                    </li>
-                                {% endfor %}
-                                {% for teacher in activeGroup.teachers %}
-                                    <li>
-                                        <a href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}
-                                            (Преподаватель)</a>
-                                    </li>
-                                {% endfor %}
-                                <li>
-                                    <a href="{{ path('app_user_show', {'id': activeGroup.administrator.user.id}) }}">{{ activeGroup.administrator.user.fullName }}
-                                        (Администратор)</a>
-                                </li>
-                            </ul>
-                        </div>
-                        {% if app.user == activeGroup.administrator.user %}
-                            <label class="cursor-pointer" for="my-modal-7"><i class="fa-solid fa-circle-plus fa-xl"></i></label>
-                            <input type="checkbox" id="my-modal-7" class="modal-toggle"/>
-                            <div class="modal">
-                                <div class="modal-box relative">
-                                    <label for="my-modal-7"
-                                           class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
-                                    <h3 class="text-lg font-bold">Добавить участника</h3>
-                                    <form method="post" action="{{ path('app_learning_add_user') }}">
-                                        <input type="hidden" name="group_id" value="{{ activeGroup.id }}">
-                                        <select name="user"
-                                                class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
-                                                required>
-                                            <option disabled selected>Выберите пользователя</option>
-                                            {% for user in users %}
-                                                {% set user_id = user.id %}
-                                                {% set is_member = user_id in activeGroup.students|map(item => item.user.id)|merge(activeGroup.teachers|map(item => item.user.id))|merge([activeGroup.administrator.user.id]) %}
-                                                {% if not is_member %}
-                                                    <option value={{ user.id }}>{{ user.fullName }}</option>
-                                                {% endif %}
-                                            {% endfor %}
-                                        </select>
-                                        <select name="role"
-                                                class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
-                                                required>
-                                            <option disabled selected>Выберите роль</option>
-                                            <option value="teacher"
-                                                    {% if activeGroup.teachers.count >= activeGroup.requiredTeachers %}
-                                                        disabled
-                                                    {% endif %}
-                                            >Преподаватель
-                                            </option>
-                                            <option value="student"
-                                                    {% if activeGroup.students.count >= activeGroup.requiredStudents %}
-                                                        disabled
-                                                    {% endif %}
-                                            >Студент
-                                            </option>
-                                        </select>
-                                        <button type="submit" class="btn btn-outline">Добавить</button>
-                                    </form>
-                                </div>
-                            </div>
+                <p class="text-xl my-2 font-bold">Участники</p>
+                {% for student in activeGroup.students %}
+                    <a class="hover:underline"
+                       href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}
+                        (Студент)</a>
+                {% endfor %}
+                {% for teacher in activeGroup.teachers %}
+                    <a class="hover:underline"
+                       href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}
+                        (Преподаватель)</a>
+                {% endfor %}
+                <a class="hover:underline"
+                   href="{{ path('app_user_show', {'id': activeGroup.administrator.user.id}) }}">{{ activeGroup.administrator.user.fullName }}
+                    (Администратор)</a>
+                <p class="text-xl my-2 font-bold">Задания
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_task_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
                         {% endif %}
+                    {% endfor %}
+                </p>
+                {% for task in activeGroup.tasks %}
+                    <div class="flex flex-row">
+                        {{ task.name }}
+                        <a class="mx-2" href="{{ path('app_task_edit', {'id': task.id}) }}"><i
+                                    class="fa-regular fa-pen-to-square"></i></a>
+                        {{ include('task/_delete_form.html.twig') }}
                     </div>
-                </div>
+                {% endfor %}
+                <p class="text-xl my-2 font-bold">Цели
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_goal_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% for goal in activeGroup.goals %}
+                    <div class="flex flex-row">
+                        {{ goal.name }}
+                        <a class="mx-2" href="{{ path('app_goal_edit', {'id': goal.id}) }}"><i
+                                    class="fa-regular fa-pen-to-square"></i></a>
+                        {{ include('goal/_delete_form.html.twig') }}
+                    </div>
+                {% endfor %}
+                <p class="text-xl my-2 font-bold">Собрания
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_meeting_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% for meeting in activeGroup.meetings %}
+                    <div class="flex flex-row">
+                        {{ meeting.name }}
+                        <a class="mx-2" href="{{ path('app_meeting_edit', {'id': meeting.id}) }}"><i
+                                    class="fa-regular fa-pen-to-square"></i></a>
+                        {{ include('meeting/_delete_form.html.twig') }}
+                    </div>
+                {% endfor %}
+                <p class="text-xl my-2 font-bold">Прикладные материалы
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <i class="fa-solid fa-circle-plus"></i>
+                        {% endif %}
+                    {% endfor %}
+                </p>
             </div>
         {% else %}
             <div class="w-3/4 flex justify-center items-center h-full text-2xl">
@@ -180,12 +184,5 @@
     <script>
         const myDiv = document.getElementById("myDiv2");
         myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;
-    </script>
-    <script>
-        // get the h1 element
-        const h1 = document.querySelector('h1');
-
-        // add a class to the h1 element
-        h1.classList.add('text-2xl', 'font-bold', 'my-class');
     </script>
 {% endblock %}

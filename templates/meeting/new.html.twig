@@ -1,11 +1,32 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Meeting{% endblock %}
+{% block title %}Создание собрания{% endblock %}
 
 {% block body %}
-    <h1>Create new Meeting</h1>
-
-    {{ include('meeting/_form.html.twig') }}
-
-    <a href="{{ path('app_meeting_index') }}">back to list</a>
+    <h1 class="ml-5 text-xl mt-5">Создание собрания</h1>
+    {{ form_start(form) }}
+    <div class="flex flex-col w-96 m-5">
+        <div>
+            {{ form_label(form.name, 'Название', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.name, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+        <div>
+            {{ form_label(form.agenda, 'Повестка дня', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.agenda, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.agenda) }}
+        </div>
+        <div>
+            {{ form_label(form.heldOn, 'Дата проведения', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.heldOn, {'attr': {'class': 'flex flex-row mt-1 mb-2'}}) }}
+            {{ form_errors(form.heldOn) }}
+        </div>
+        <div>
+            {{ form_label(form.link, 'Ссылка', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.link, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.link) }}
+        </div>
+        <button type="submit" class="btn btn-outline w-full">Создать</button>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}
