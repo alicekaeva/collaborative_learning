@@ -16,7 +16,10 @@ class GoalType extends AbstractType
     {
         $builder
             ->add('name', TextType::class)
-            ->add('deadline', DateType::class)
+            ->add('deadline', DateType::class,
+                [
+                    'widget' => 'single_text',
+                ])
             ->add('points', IntegerType::class);
     }
 

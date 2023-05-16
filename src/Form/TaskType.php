@@ -20,7 +20,10 @@ class TaskType extends AbstractType
             ->add('link', UrlType::class, [
                 'required' => false,
             ])
-            ->add('deadline', DateTimeType::class)
+            ->add('deadline', DateTimeType::class,
+                [
+                    'widget' => 'single_text',
+                ])
             ->add('points', IntegerType::class);
     }
 

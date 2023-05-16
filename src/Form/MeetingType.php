@@ -19,7 +19,10 @@ class MeetingType extends AbstractType
             ->add('name', TextType::class)
             ->add('agenda', TextareaType::class)
             ->add('link', UrlType::class)
-            ->add('heldOn', DateTimeType::class)
+            ->add('heldOn', DateTimeType::class,
+                [
+                    'widget' => 'single_text',
+                ])
         ;
     }
 
