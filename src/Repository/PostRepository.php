@@ -60,13 +60,25 @@ class PostRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
-    public function findPostsByTags(array $tags)
+
+    public function findRecommendedPosts(array $tags): array
     {
-        $qb = $this->createQueryBuilder('p')
+        return $this->createQueryBuilder('p')
             ->join('p.tags', 't')
             ->where('t IN (:tags)')
-            ->setParameter('tags', $tags);
+            ->setParameter('tags', $tags)
+            ->getQuery()
+            ->getResult();
+    }
 
-        return $qb->getQuery()->getResult();
+    public function findFavoritePosts(int|User $user): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.addedToFav', 'f')
+            ->where('f = :user')
+            ->setParameter('user',
+                $user instanceof User ? $user->getId() : $user)
+            ->getQuery()
+            ->getResult();
     }
 }

@@ -1,0 +1,4 @@
+<a class="tab tab-bordered {% if app.request.get('_route') == route %}tab-active{% endif %}"
+   href="{% block path %}{% endblock %}">
+    {% block content %}{% endblock %}
+</a>

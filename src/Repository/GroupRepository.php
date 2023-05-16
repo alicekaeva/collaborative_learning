@@ -62,4 +62,14 @@ class GroupRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+
+    public function findRecommendedGroups(array $tags): array
+    {
+        return $this->createQueryBuilder('g')
+            ->join('g.tags', 't')
+            ->where('t IN (:tags)')
+            ->setParameter('tags', $tags)
+            ->getQuery()
+            ->getResult();
+    }
 }

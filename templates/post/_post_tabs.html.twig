@@ -1,0 +1,30 @@
+{% embed 'shared/_tabs.html.twig' %}
+    {% block tabs %}
+        {% embed 'shared/_tab.html.twig' with { route: 'app_post_index' } %}
+            {% block content %}
+                Все объявления
+            {% endblock %}
+            {% block path %}
+                {{ path('app_post_index') }}
+            {% endblock %}
+        {% endembed %}
+
+        {% embed 'shared/_tab.html.twig' with { route: 'app_post_recommended' } %}
+            {% block content %}
+                Рекомендованное
+            {% endblock %}
+            {% block path %}
+                {{ path('app_post_recommended') }}
+            {% endblock %}
+        {% endembed %}
+
+        {% embed 'shared/_tab.html.twig' with { route: 'app_post_favorites' } %}
+            {% block content %}
+                Избранное
+            {% endblock %}
+            {% block path %}
+                {{ path('app_post_favorites') }}
+            {% endblock %}
+        {% endembed %}
+    {% endblock %}
+{% endembed %}

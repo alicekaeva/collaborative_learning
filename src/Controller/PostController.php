@@ -19,13 +19,29 @@ class PostController extends AbstractController
     #[Route('/', name: 'app_post_index', methods: ['GET'])]
     public function index(PostRepository $postRepository): Response
     {
-        $user = $this->getUser();
-        if ($user && $user->getTags()->count() > 0){
-            $posts = $postRepository->findPostsByTags($user->getTags()->toArray());
-        } else {
-            $posts = $postRepository->findAll();
-        }
         return $this->render('post/index.html.twig', [
+            'posts' => $postRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/recommended', name: 'app_post_recommended', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function recommended(PostRepository $postRepository): Response
+    {
+        $user = $this->getUser();
+        $posts = $postRepository->findRecommendedPosts($user->getTags()->toArray());
+        return $this->render('post/recommended.html.twig', [
+            'posts' => $posts,
+        ]);
+    }
+
+    #[Route('/favorites', name: 'app_post_favorites', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function favorites(PostRepository $postRepository): Response
+    {
+        $user = $this->getUser();
+        $posts = $postRepository->findFavoritePosts($user);
+        return $this->render('post/favorites.html.twig', [
             'posts' => $posts,
         ]);
     }
@@ -104,7 +120,7 @@ class PostController extends AbstractController
             return $this->redirectToRoute('app_post_show', ['id' => $post->getAuthor()->getId()], Response::HTTP_SEE_OTHER);
         }
         return $this->renderForm('post/edit.html.twig', [
-            'post'=> $post
+            'post' => $post
         ]);
     }
 

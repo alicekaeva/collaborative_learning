@@ -15,6 +15,7 @@ use App\Repository\StudentRepository;
 use App\Repository\TagRepository;
 use App\Repository\TeacherRepository;
 use App\Repository\UserRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,6 +30,17 @@ class GroupController extends AbstractController
     {
         return $this->render('group/index.html.twig', [
             'groups' => $groupRepository->findAll(),
+        ]);
+    }
+
+    #[Route('/recommended', name: 'app_group_recommended', methods: ['GET'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function recommended(GroupRepository $groupRepository): Response
+    {
+        $user = $this->getUser();
+        $groups = $groupRepository->findRecommendedGroups($user->getTags()->toArray());
+        return $this->render('group/recommended.html.twig', [
+            'groups' => $groups,
         ]);
     }
 

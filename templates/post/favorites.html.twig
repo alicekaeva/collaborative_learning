@@ -14,4 +14,11 @@
         {{ include ('post/_post_tabs.html.twig') }}
     {% endif %}
     {{ include ('post/_post_list.html.twig') }}
+    {% if app.user.favorites|length == 0 %}
+        <div class="flex justify-center items-center">
+            <div class="flex justify-center w-1/6 m-5 alert shadow-lg">
+                Нет избранных объявлений
+            </div>
+        </div>
+    {% endif %}
 {% endblock %}
