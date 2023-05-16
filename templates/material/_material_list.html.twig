@@ -1,0 +1,25 @@
+{% for material in materials %}
+    <div class="card w-full bg-base-100 shadow-xl mb-3">
+        <div class="card-body">
+            <div class="flex justify-start">
+                <div>{{ material.creatorUser.fullName }}</div>
+            </div>
+            <p class="card-title">{{ material.name }}</p>
+            <div class="card-actions flex justify-between">
+                <div>
+                    <a href="{{ path('app_material_index', {'category': material.creatorGroup.tags[0].category.name == app.request.query.get('category') ? null : material.creatorGroup.tags[0].category.name}) }}"
+                       class="badge badge-outline bg-green-{{ material.creatorGroup.tags[0].category.name == app.request.query.get('category') ? '400' : '200' }}"
+                    >{{ material.creatorGroup.tags[0].category.name }}</a>
+                    {% for tag in material.creatorGroup.tags %}
+                        <a href="{{ path('app_material_index', {'tag': tag.name == app.request.query.get('tag') ? null : tag.name}) }}"
+                           class="badge badge-outline bg-fuchsia-{{ tag.name == app.request.query.get('tag') ? '400' : '200' }}"
+                        >{{ tag.name }}</a>
+                    {% endfor %}
+                    {% set fileUrl = asset('uploads/materials/' ~ material.fileLink) %}
+                    <a class="badge badge-outline" href="{{ fileUrl }}" target="_blank">Посмотреть файл</a>
+                    <a class="badge badge-outline" href="{{ fileUrl }}" download="{{ material.name }}">Скачать файл</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}

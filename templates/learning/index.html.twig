@@ -122,7 +122,8 @@
                                                             <option value={{ student.user.id }}>{{ student.user.fullName }}</option>
                                                         {% endfor %}
                                                     </select>
-                                                    <input type="number" name="points" required="required" class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                                                    <input type="number" name="points" required="required"
+                                                           class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
                                                     <button type="submit" class="btn btn-outline">Начислить</button>
                                                 </form>
                                             </div>
@@ -256,10 +257,42 @@
                 <p class="text-xl my-2 font-bold">Прикладные материалы
                     {% for teacher in activeGroup.teachers %}
                         {% if app.user == teacher.user %}
-                            <i class="fa-solid fa-circle-plus"></i>
+                            <a href="{{ path('app_material_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                    {% for student in activeGroup.students %}
+                        {% if app.user == student.user %}
+                            <a href="{{ path('app_material_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
                         {% endif %}
                     {% endfor %}
                 </p>
+                {% for material in activeGroup.materials %}
+                    <div class="flex flex-row">
+                        <label class="cursor-pointer"
+                               for="my-modal-material-{{ material.id }}">{{ material.name|slice(0, 35) ~ (material.name|length > 35 ? '...' : '') }}</label>
+                        <input type="checkbox" id="my-modal-material-{{ material.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-material-{{ material.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ material.name }}</p>
+                                <p><b>Создатель: </b>{{ material.creatorUser.fullName }}</p>
+                                <div class="flex flex-row">
+                                    {% set fileUrl = asset('uploads/materials/' ~ material.fileLink) %}
+                                    <div class="flex flex-row mt-1">
+                                        <a class="btn btn-xs mr-2" href="{{ fileUrl }}" target="_blank">Посмотреть файл</a>
+                                        <a class="btn btn-xs" href="{{ fileUrl }}" download="{{ material.name }}">Скачать файл</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if app.user == material.creatorUser %}
+                            <a class="mx-2" href="{{ path('app_material_edit', {'id': material.id}) }}"><i
+                                        class="fa-regular fa-pen-to-square"></i></a>
+                            {{ include('material/_delete_form.html.twig') }}
+                        {% endif %}
+                    </div>
+                {% endfor %}
             </div>
         {% else %}
             <div class="w-3/4 flex justify-center items-center h-full text-2xl">

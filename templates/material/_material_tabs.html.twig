@@ -1,0 +1,21 @@
+{% embed 'shared/_tabs.html.twig' %}
+    {% block tabs %}
+        {% embed 'shared/_tab.html.twig' with { route: 'app_material_index' } %}
+            {% block content %}
+                Все прикладные материалы
+            {% endblock %}
+            {% block path %}
+                {{ path('app_material_index') }}
+            {% endblock %}
+        {% endembed %}
+
+        {% embed 'shared/_tab.html.twig' with { route: 'app_material_recommended' } %}
+            {% block content %}
+                Рекомендованное
+            {% endblock %}
+            {% block path %}
+                {{ path('app_material_recommended') }}
+            {% endblock %}
+        {% endembed %}
+    {% endblock %}
+{% endembed %}
