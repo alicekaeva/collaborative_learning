@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Group;
 use App\Entity\Tag;
 use App\Entity\User;
@@ -74,12 +75,23 @@ class GroupRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findGroupsByTags(Tag $tag): array
+    public function findGroupsByTag(Tag $tag): array
     {
         return $this->createQueryBuilder('g')
             ->join('g.tags', 't')
             ->where(':tag MEMBER OF g.tags')
             ->setParameter('tag', $tag)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findGroupsByCategory(Category $category): array
+    {
+        return $this->createQueryBuilder('g')
+            ->join('g.tags', 't')
+            ->join('t.category', 'c')
+            ->where('c.id = :category_id')
+            ->setParameter('category_id', $category->getId())
             ->getQuery()
             ->getResult();
     }

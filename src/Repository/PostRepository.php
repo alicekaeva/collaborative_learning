@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Post;
 use App\Entity\Tag;
 use App\Entity\User;
@@ -83,12 +84,23 @@ class PostRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findPostsByTags(Tag $tag): array
+    public function findPostsByTag(Tag $tag): array
     {
         return $this->createQueryBuilder('p')
             ->join('p.tags', 't')
             ->where(':tag MEMBER OF p.tags')
             ->setParameter('tag', $tag)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findPostsByCategory(Category $category): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.tags', 't')
+            ->join('t.category', 'c')
+            ->where('c.id = :category_id')
+            ->setParameter('category_id', $category->getId())
             ->getQuery()
             ->getResult();
     }

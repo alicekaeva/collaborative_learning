@@ -7,10 +7,12 @@
             <p class="card-title">{{ group.info }}</p>
             <div class="card-actions flex justify-between">
                 <div>
-                    <div class="badge badge-outline bg-green-200">{{ group.tags[0].category.name }}</div>
+                    <a href="{{ path('app_group_index', {'category': group.tags[0].category.name == app.request.query.get('category') ? null : group.tags[0].category.name}) }}"
+                       class="badge badge-outline bg-green-{{ group.tags[0].category.name == app.request.query.get('category') ? '400' : '200' }}"
+                    >{{ group.tags[0].category.name }}</a>
                     {% for tag in group.tags %}
                         <a href="{{ path('app_group_index', {'tag': tag.name == app.request.query.get('tag') ? null : tag.name}) }}"
-                           class="badge badge-outline bg-fuchsia-200"
+                           class="badge badge-outline bg-fuchsia-{{ tag.name == app.request.query.get('tag') ? '400' : '200' }}"
                         >{{ tag.name }}</a>
                     {% endfor %}
                     {% if is_granted('IS_AUTHENTICATED_FULLY') %}

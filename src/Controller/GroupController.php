@@ -26,11 +26,14 @@ use Symfony\Component\Routing\Annotation\Route;
 class GroupController extends AbstractController
 {
     #[Route('/', name: 'app_group_index', methods: ['GET'])]
-    public function index(Request $request, TagRepository $tagRepository, GroupRepository $groupRepository): Response
+    public function index(Request $request, TagRepository $tagRepository, GroupRepository $groupRepository, CategoryRepository $categoryRepository): Response
     {
         if ($request->query->has('tag')) {
             $tag = $tagRepository->findOneBy(['name' => $request->query->get('tag')]);
-            $groups = $groupRepository->findGroupsByTags($tag);
+            $groups = $groupRepository->findGroupsByTag($tag);
+        } elseif ($request->query->has('category')) {
+            $category = $categoryRepository->findOneBy(['name' => $request->query->get('category')]);
+            $groups = $groupRepository->findGroupsByCategory($category);
         } else {
             $groups = $groupRepository->findAll();
         }
@@ -149,7 +152,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/management', name: 'app_group_management', methods: ['GET', 'POST'])]
-    public function management (Group $group, UserRepository $userRepository): Response
+    public function management(Group $group, UserRepository $userRepository): Response
     {
         return $this->renderForm('group/management.html.twig', [
             'group' => $group,

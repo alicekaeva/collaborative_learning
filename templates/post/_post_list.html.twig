@@ -12,10 +12,12 @@
             <p class="card-title">{{ post.content }}</p>
             <div class="card-actions flex justify-between">
                 <div>
-                    <div class="badge badge-outline bg-green-200">{{ post.tags[0].category.name }}</div>
+                    <a href="{{ path('app_post_index', {'category': post.tags[0].category.name == app.request.query.get('category') ? null : post.tags[0].category.name}) }}"
+                       class="badge badge-outline bg-green-{{ post.tags[0].category.name == app.request.query.get('category') ? '400' : '200' }}"
+                    >{{ post.tags[0].category.name }}</a>
                     {% for tag in post.tags %}
                         <a href="{{ path('app_post_index', {'tag': tag.name == app.request.query.get('tag') ? null : tag.name}) }}"
-                           class="badge badge-outline bg-fuchsia-200"
+                           class="badge badge-outline bg-fuchsia-{{ tag.name == app.request.query.get('tag') ? '400' : '200' }}"
                         >{{ tag.name }}</a>
                     {% endfor %}
                 </div>
