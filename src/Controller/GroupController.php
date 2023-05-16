@@ -7,6 +7,7 @@ use App\Entity\Group;
 use App\Entity\Message;
 use App\Entity\Student;
 use App\Entity\Teacher;
+use App\Entity\User;
 use App\Repository\AdminRepository;
 use App\Repository\CategoryRepository;
 use App\Repository\GroupRepository;
@@ -47,6 +48,7 @@ class GroupController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function recommended(GroupRepository $groupRepository): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $groups = $groupRepository->findRecommendedGroups($user->getTags()->toArray());
         return $this->render('group/recommended.html.twig', [
@@ -104,6 +106,7 @@ class GroupController extends AbstractController
             foreach ($tags as $tag) {
                 $group->addTag($tag);
             }
+            /** @var User $user */
             $user = $this->getUser();
             $admin = $adminRepository->findOneBy(['user' => $user]);
             if (!$admin) {

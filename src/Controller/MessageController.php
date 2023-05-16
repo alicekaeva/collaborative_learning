@@ -20,6 +20,7 @@ class MessageController extends AbstractController
     #[Route('/', name: 'app_message_index', methods: ['GET'])]
     public function index(MessageRepository $messageRepository): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $dialogs = $messageRepository->findAllUsersDialogs($user);
 
@@ -87,6 +88,7 @@ class MessageController extends AbstractController
     #[Route('/dialog/{id}', name: 'app_message_show', methods: ['GET'])]
     public function show(MessageRepository $messageRepository, User $receiver): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $dialogs = $messageRepository->findAllUsersDialogs($user);
 

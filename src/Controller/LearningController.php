@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Group;
 use App\Entity\Message;
+use App\Entity\User;
 use App\Repository\GroupRepository;
 use App\Repository\MessageRepository;
 use App\Repository\UserRepository;
@@ -33,6 +34,7 @@ class LearningController extends AbstractController
     #[Route('/group/{id}', name: 'app_learning_show', methods: ['GET'])]
     public function show(MessageRepository $messageRepository, GroupRepository $groupRepository, Group $receivingGroup, UserRepository $userRepository): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $groups = $groupRepository->findAllGroupsForUser($user);
         $chat = $messageRepository->findGroupChat($receivingGroup);

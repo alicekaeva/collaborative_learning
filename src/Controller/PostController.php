@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+
 #[Route('/post')]
 class PostController extends AbstractController
 {
@@ -49,6 +50,7 @@ class PostController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function favorites(PostRepository $postRepository): Response
     {
+        /** @var User $user */
         $user = $this->getUser();
         $posts = $postRepository->findFavoritePosts($user);
         return $this->render('post/favorites.html.twig', [
@@ -81,6 +83,7 @@ class PostController extends AbstractController
     #[Route('/favorite/{id}', name: 'app_favorite')]
     public function favorite(Post $post, PostRepository $posts, Request $request): Response
     {
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
         $post->addAddedToFav($currentUser);
         $posts->save($post, true);
@@ -91,6 +94,7 @@ class PostController extends AbstractController
     #[Route('/unfavorite/{id}', name: 'app_unfavorite')]
     public function unfavorite(Post $post, PostRepository $posts, Request $request): Response
     {
+        /** @var User $currentUser */
         $currentUser = $this->getUser();
         $post->removeAddedToFav($currentUser);
         $posts->save($post, true);
