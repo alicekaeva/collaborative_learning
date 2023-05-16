@@ -15,7 +15,6 @@ use App\Repository\StudentRepository;
 use App\Repository\TagRepository;
 use App\Repository\TeacherRepository;
 use App\Repository\UserRepository;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -65,7 +64,6 @@ class GroupController extends AbstractController
     }
 
     #[Route('/new', name: 'app_group_new', methods: ['GET', 'POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function new(Request $request, GroupRepository $groupRepository, AdminRepository $adminRepository, UserRepository $userRepository, TagRepository $tagRepository, CategoryRepository $categoryRepository): Response
     {
         if ($request->isMethod('POST')) {
@@ -132,8 +130,7 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/management', name: 'app_group_management', methods: ['GET', 'POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function management (Request $request, Group $group, GroupRepository $groupRepository, UserRepository $userRepository): Response
+    public function management (Group $group, UserRepository $userRepository): Response
     {
         return $this->renderForm('group/management.html.twig', [
             'group' => $group,
@@ -142,7 +139,6 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_group_edit', methods: ['GET', 'POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function edit(Request $request, Group $group, GroupRepository $groupRepository, TagRepository $tagRepository): Response
     {
         if ($request->isMethod('POST')) {
@@ -285,7 +281,6 @@ class GroupController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_group_delete', methods: ['POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function delete(Request $request, Group $group, GroupRepository $groupRepository): Response
     {
         if ($this->isCsrfTokenValid('delete' . $group->getId(), $request->request->get('_token'))) {

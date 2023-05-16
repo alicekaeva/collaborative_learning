@@ -6,12 +6,14 @@ use App\Entity\Task;
 use App\Form\TaskType;
 use App\Repository\GroupRepository;
 use App\Repository\TaskRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/task')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class TaskController extends AbstractController
 {
     #[Route('/', name: 'app_task_index', methods: ['GET'])]

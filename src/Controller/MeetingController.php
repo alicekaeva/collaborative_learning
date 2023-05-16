@@ -6,12 +6,14 @@ use App\Entity\Meeting;
 use App\Form\MeetingType;
 use App\Repository\GroupRepository;
 use App\Repository\MeetingRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/meeting')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class MeetingController extends AbstractController
 {
     #[Route('/', name: 'app_meeting_index', methods: ['GET'])]

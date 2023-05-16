@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/goal')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class GoalController extends AbstractController
 {
     #[Route('/', name: 'app_goal_index', methods: ['GET'])]
@@ -87,7 +88,6 @@ class GoalController extends AbstractController
     }
 
     #[Route('/complete/{id}', name: 'app_complete')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function complete(Goal $goal, GoalRepository $goals, Request $request): Response
     {
         $goal->setCompleted(1);
@@ -97,7 +97,6 @@ class GoalController extends AbstractController
     }
 
     #[Route('/uncomplete/{id}', name: 'app_uncomplete')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function uncomplete(Goal $goal, GoalRepository $goals, Request $request): Response
     {
         $goal->setCompleted(0);

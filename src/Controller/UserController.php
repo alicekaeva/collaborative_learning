@@ -25,7 +25,6 @@ class UserController extends AbstractController
     }
 
     #[Route('/earn_points', name: 'app_user_earn_points', methods: ['POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function earnPoints(Request $request, UserRepository $userRepository): Response
     {
         $userId = $request->request->get('student');

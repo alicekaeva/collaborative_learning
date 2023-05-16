@@ -31,7 +31,6 @@ class PostController extends AbstractController
     }
 
     #[Route('/new', name: 'app_post_new', methods: ['GET', 'POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function new(Request $request, PostRepository $postRepository, CategoryRepository $categoryRepository, TagRepository $tagRepository): Response
     {
         if ($request->isMethod('POST')) {
@@ -54,7 +53,6 @@ class PostController extends AbstractController
     }
 
     #[Route('/favorite/{id}', name: 'app_favorite')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function favorite(Post $post, PostRepository $posts, Request $request): Response
     {
         $currentUser = $this->getUser();
@@ -65,7 +63,6 @@ class PostController extends AbstractController
     }
 
     #[Route('/unfavorite/{id}', name: 'app_unfavorite')]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function unfavorite(Post $post, PostRepository $posts, Request $request): Response
     {
         $currentUser = $this->getUser();
@@ -86,7 +83,6 @@ class PostController extends AbstractController
     }
 
     #[Route('/{id}/edit', name: 'app_post_edit', methods: ['GET', 'POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function edit(Request $request, Post $post, PostRepository $postRepository, CategoryRepository $categoryRepository, TagRepository $tagRepository): Response
     {
         if ($request->isMethod('POST')) {
@@ -113,7 +109,6 @@ class PostController extends AbstractController
     }
 
     #[Route('/{id}', name: 'app_post_delete', methods: ['POST'])]
-    #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function delete(Request $request, Post $post, PostRepository $postRepository): Response
     {
         if ($this->isCsrfTokenValid('delete' . $post->getId(), $request->request->get('_token'))) {
