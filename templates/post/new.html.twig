@@ -16,7 +16,7 @@
                     <label class="block text-sm text-gray-700 font-medium" for="category">
                         Категория
                     </label>
-                    <label for="my-modal-3"><i class="fa-solid fa-circle-plus fa-xl"
+                    <label for="new-category-1"><i class="fa-solid fa-circle-plus fa-xl"
                                                style="color: #333b4d;"></i></label>
                 </div>
                 <select id="category" name='category' required
@@ -30,7 +30,7 @@
                     <label class="block text-sm text-gray-700 font-medium" for="tags">
                         Теги
                     </label>
-                    <label for="my-modal-4"><i class="fa-solid fa-circle-plus fa-xl"
+                    <label for="new-tag-1"><i class="fa-solid fa-circle-plus fa-xl"
                                                style="color: #333b4d;"></i></label>
                 </div>
                 <select multiple id="tags" name='tags[]' required
@@ -41,10 +41,10 @@
             </form>
         </div>
     </div>
-    <input type="checkbox" id="my-modal-3" class="modal-toggle"/>
+    <input type="checkbox" id="new-category-1" class="modal-toggle"/>
     <div class="modal">
         <div class="modal-box relative">
-            <label for="my-modal-3" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <label for="new-category-1" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Добавить категорию</h3>
             <form method="post" action="{{ path('app_category_new') }}">
                 <input type="text" name="new_category" class="input input-bordered max-w-xs"/>
@@ -52,10 +52,10 @@
             </form>
         </div>
     </div>
-    <input type="checkbox" id="my-modal-4" class="modal-toggle"/>
+    <input type="checkbox" id="new-tag-1" class="modal-toggle"/>
     <div class="modal">
         <div class="modal-box relative">
-            <label for="my-modal-4" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <label for="new-tag-1" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Добавить тег</h3>
             <form method="post" action="{{ path('app_tag_new') }}">
                 <select name='category' class="select select-bordered w-full mt-2 max-w-xs">

@@ -24,7 +24,7 @@
                     <label class="block text-sm text-gray-700 font-medium" for="tags">
                         Теги
                     </label>
-                    <label for="my-modal-5"><i class="fa-solid fa-circle-plus fa-xl"
+                    <label for="new-tag-2"><i class="fa-solid fa-circle-plus fa-xl"
                                                style="color: #333b4d;"></i></label>
                 </div>
                 <select id="tags" multiple name='tags[]' required
@@ -37,10 +37,10 @@
             </form>
         </div>
     </div>
-    <input type="checkbox" id="my-modal-5" class="modal-toggle"/>
+    <input type="checkbox" id="new-tag-2" class="modal-toggle"/>
     <div class="modal">
         <div class="modal-box relative">
-            <label for="my-modal-5" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <label for="new-tag-2" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Добавить тег</h3>
             <form method="post" action="{{ path('app_tag_new') }}">
                 <input type="hidden" name="category" value="{{ post.tags[0].category.id }}">

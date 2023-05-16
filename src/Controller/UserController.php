@@ -7,6 +7,7 @@ use App\Form\UserType;
 use App\Repository\CategoryRepository;
 use App\Repository\TagRepository;
 use App\Repository\UserRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,6 +22,18 @@ class UserController extends AbstractController
         return $this->render('user/index.html.twig', [
             'users' => $userRepository->findAll(),
         ]);
+    }
+
+    #[Route('/earn_points', name: 'app_user_earn_points', methods: ['POST'])]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function earnPoints(Request $request, UserRepository $userRepository): Response
+    {
+        $userId = $request->request->get('student');
+        $user = $userRepository->findOneBy(['id' => $userId]);
+        $points = $request->request->get('points');
+        $user->setPointsAmount($user->getPointsAmount()+$points);
+        $userRepository->save($user, true);
+        return $this->redirect($request->headers->get('referer'));
     }
 
     #[Route('/new', name: 'app_user_new', methods: ['GET', 'POST'])]

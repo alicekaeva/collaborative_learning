@@ -6,6 +6,7 @@ use App\Entity\Goal;
 use App\Form\GoalType;
 use App\Repository\GoalRepository;
 use App\Repository\GroupRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -81,6 +82,26 @@ class GoalController extends AbstractController
         if ($this->isCsrfTokenValid('delete' . $goal->getId(), $request->request->get('_token'))) {
             $goalRepository->remove($goal, true);
         }
+
+        return $this->redirect($request->headers->get('referer'));
+    }
+
+    #[Route('/complete/{id}', name: 'app_complete')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function complete(Goal $goal, GoalRepository $goals, Request $request): Response
+    {
+        $goal->setCompleted(1);
+        $goals->save($goal, true);
+
+        return $this->redirect($request->headers->get('referer'));
+    }
+
+    #[Route('/uncomplete/{id}', name: 'app_uncomplete')]
+    #[IsGranted('IS_AUTHENTICATED_FULLY')]
+    public function uncomplete(Goal $goal, GoalRepository $goals, Request $request): Response
+    {
+        $goal->setCompleted(0);
+        $goals->save($goal, true);
 
         return $this->redirect($request->headers->get('referer'));
     }

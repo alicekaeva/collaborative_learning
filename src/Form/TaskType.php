@@ -17,7 +17,9 @@ class TaskType extends AbstractType
     {
         $builder
             ->add('name', TextType::class)
-            ->add('link', UrlType::class)
+            ->add('link', UrlType::class, [
+                'required' => false,
+            ])
             ->add('deadline', DateTimeType::class)
             ->add('points', IntegerType::class);
     }

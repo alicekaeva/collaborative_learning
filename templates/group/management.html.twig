@@ -15,14 +15,14 @@
                     (Преподаватель)</a>
             {% endfor %}
         </div>
-        <label for="my-modal-7" class="btn w-2/3 my-2">Добавить участника</label>
-        <label for="my-modal-10" class="btn w-2/3 my-2">Редактировать участника</label>
-        <label for="my-modal-11" class="btn w-2/3 my-2">Удалить участника</label>
+        <label for="new-participant" class="btn w-2/3 my-2">Добавить участника</label>
+        <label for="edit-participant" class="btn w-2/3 my-2">Редактировать участника</label>
+        <label for="delete-participant" class="btn w-2/3 my-2">Удалить участника</label>
     </div>
-    <input type="checkbox" id="my-modal-7" class="modal-toggle"/>
+    <input type="checkbox" id="new-participant" class="modal-toggle"/>
     <div class="modal">
         <div class="modal-box relative">
-            <label for="my-modal-7" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <label for="new-participant" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Добавить участника</h3>
             <form method="post" action="{{ path('app_group_add_user') }}">
                 <input type="hidden" name="group_id" value="{{ group.id }}">
@@ -59,10 +59,10 @@
             </form>
         </div>
     </div>
-    <input type="checkbox" id="my-modal-10" class="modal-toggle"/>
+    <input type="checkbox" id="edit-participant" class="modal-toggle"/>
     <div class="modal">
         <div class="modal-box relative">
-            <label for="my-modal-10"
+            <label for="edit-participant"
                    class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Редактировать участника</h3>
             <form method="post" action="{{ path('app_group_edit_user') }}">
@@ -99,10 +99,10 @@
             </form>
         </div>
     </div>
-    <input type="checkbox" id="my-modal-11" class="modal-toggle"/>
+    <input type="checkbox" id="delete-participant" class="modal-toggle"/>
     <div class="modal">
         <div class="modal-box relative">
-            <label for="my-modal-11"
+            <label for="delete-participant"
                    class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Удалить участника</h3>
             <form method="post" action="{{ path('app_group_delete_user') }}">

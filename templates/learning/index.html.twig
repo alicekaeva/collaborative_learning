@@ -20,11 +20,11 @@
             <div class="w-2/4 relative flex flex-col justify-end items-center h-full border-r-2">
                 {% if chat is not empty %}
                     <div class="absolute left-0 top-0 tooltip tooltip-bottom m-3" data-tip="Закрепленные сообщения">
-                        <label for="my-modal-9" class="cursor-pointer"><i
+                        <label for="pinned-messages" class="cursor-pointer"><i
                                     class="fa-solid fa-bookmark fa-xl"></i></label>
                     </div>
-                    <input type="checkbox" id="my-modal-9" class="modal-toggle"/>
-                    <label for="my-modal-9" class="modal cursor-pointer">
+                    <input type="checkbox" id="pinned-messages" class="modal-toggle"/>
+                    <label for="pinned-messages" class="modal cursor-pointer">
                         <label class="modal-box relative" for="">
                             {% for message in chat %}
                                 {% if message.isPinned %}
@@ -100,10 +100,35 @@
                                         группу</a>
                                     <a class="badge badge-outline bg-orange-200"
                                        href="{{ path('app_group_management', {'id': activeGroup.id}) }}">Управление
-                                        участниками
-                                        группы</a>
+                                        участниками</a>
                                     {{ include('group/_delete_form.html.twig') }}
                                 {% endif %}
+                                {% for teacher in activeGroup.teachers %}
+                                    {% if app.user == teacher.user %}
+                                        <label class="badge badge-outline bg-orange-200 cursor-pointer"
+                                               for="points">Начислить баллы</label>
+                                        <input type="checkbox" id="points" class="modal-toggle"/>
+                                        <div class="modal">
+                                            <div class="modal-box relative">
+                                                <label for="points"
+                                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                                <h3 class="text-lg font-bold">Начислить баллы</h3>
+                                                <form method="post" action="{{ path('app_user_earn_points') }}">
+                                                    <select name="student"
+                                                            class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                                                            required>
+                                                        <option disabled selected>Выберите пользователя</option>
+                                                        {% for student in activeGroup.students %}
+                                                            <option value={{ student.user.id }}>{{ student.user.fullName }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <input type="number" name="points" required="required" class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                                                    <button type="submit" class="btn btn-outline">Начислить</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
                             </div>
                         </div>
                     </div>
@@ -131,10 +156,28 @@
                 </p>
                 {% for task in activeGroup.tasks %}
                     <div class="flex flex-row">
-                        {{ task.name }}
-                        <a class="mx-2" href="{{ path('app_task_edit', {'id': task.id}) }}"><i
-                                    class="fa-regular fa-pen-to-square"></i></a>
-                        {{ include('task/_delete_form.html.twig') }}
+                        <label class="cursor-pointer"
+                               for="my-modal-task-{{ task.id }}">{{ task.name|slice(0, 35) ~ (task.name|length > 35 ? '...' : '') }}</label>
+                        <input type="checkbox" id="my-modal-task-{{ task.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-task-{{ task.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ task.name }}</p>
+                                {% if task.link %}
+                                    <a href="{{ task.link }}"><b>Ссылка на задание</b></a>
+                                {% endif %}
+                                <p class="text-red-500"><b>Дедлайн: </b>{{ task.deadline|date('H:i d/m/Y') }}</p>
+                                <p><b>Количество очков: </b>{{ task.points }}</p>
+                            </div>
+                        </div>
+                        {% for teacher in activeGroup.teachers %}
+                            {% if app.user == teacher.user %}
+                                <a class="mx-2" href="{{ path('app_task_edit', {'id': task.id}) }}"><i
+                                            class="fa-regular fa-pen-to-square"></i></a>
+                                {{ include('task/_delete_form.html.twig') }}
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 {% endfor %}
                 <p class="text-xl my-2 font-bold">Цели
@@ -146,10 +189,34 @@
                 </p>
                 {% for goal in activeGroup.goals %}
                     <div class="flex flex-row">
-                        {{ goal.name }}
-                        <a class="mx-2" href="{{ path('app_goal_edit', {'id': goal.id}) }}"><i
-                                    class="fa-regular fa-pen-to-square"></i></a>
-                        {{ include('goal/_delete_form.html.twig') }}
+                        {% if goal.completed %}
+                            <a class="mx-1" href="{{ path('app_uncomplete', { id: goal.id }) }}"><i
+                                        class="fa-solid fa-square-check"></i></a>
+                            <label class="cursor-pointer"
+                                   for="my-modal-goal-{{ goal.id }}">{{ goal.name|slice(0, 35) ~ (goal.name|length > 35 ? '...' : '') }}</label>
+                        {% else %}
+                            <a class="mx-1" href="{{ path('app_complete', { id: goal.id }) }}"><i
+                                        class="fa-regular fa-square-check"></i></a>
+                            <label class="cursor-pointer"
+                                   for="my-modal-goal-{{ goal.id }}">{{ goal.name|slice(0, 35) ~ (goal.name|length > 35 ? '...' : '') }}</label>
+                        {% endif %}
+                        <input type="checkbox" id="my-modal-goal-{{ goal.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-goal-{{ goal.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ goal.name }}</p>
+                                <p class="text-red-500"><b>Дедлайн: </b>{{ goal.deadline|date('H:i d/m/Y') }}</p>
+                                <p><b>Количество очков: </b>{{ goal.points }}</p>
+                            </div>
+                        </div>
+                        {% for teacher in activeGroup.teachers %}
+                            {% if app.user == teacher.user %}
+                                <a class="mx-2" href="{{ path('app_goal_edit', {'id': goal.id}) }}"><i
+                                            class="fa-regular fa-pen-to-square"></i></a>
+                                {{ include('goal/_delete_form.html.twig') }}
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 {% endfor %}
                 <p class="text-xl my-2 font-bold">Собрания
@@ -161,10 +228,29 @@
                 </p>
                 {% for meeting in activeGroup.meetings %}
                     <div class="flex flex-row">
-                        {{ meeting.name }}
-                        <a class="mx-2" href="{{ path('app_meeting_edit', {'id': meeting.id}) }}"><i
-                                    class="fa-regular fa-pen-to-square"></i></a>
-                        {{ include('meeting/_delete_form.html.twig') }}
+                        <label class="cursor-pointer"
+                               for="my-modal-meeting-{{ meeting.id }}">{{ meeting.name|slice(0, 35) ~ (meeting.name|length > 35 ? '...' : '') }}</label>
+                        <input type="checkbox" id="my-modal-meeting-{{ meeting.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-meeting-{{ meeting.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ meeting.name }}</p>
+                                <p><b>Повестка дня: </b>{{ meeting.agenda }}</p>
+                                {% if meeting.link %}
+                                    <a href="{{ meeting.link }}"><b>Ссылка на задание</b></a>
+                                {% endif %}
+                                <p class="text-red-500"><b>Дата проведения: </b>{{ meeting.heldOn|date('H:i d/m/Y') }}
+                                </p>
+                            </div>
+                        </div>
+                        {% for teacher in activeGroup.teachers %}
+                            {% if app.user == teacher.user %}
+                                <a class="mx-2" href="{{ path('app_meeting_edit', {'id': meeting.id}) }}"><i
+                                            class="fa-regular fa-pen-to-square"></i></a>
+                                {{ include('meeting/_delete_form.html.twig') }}
+                            {% endif %}
+                        {% endfor %}
                     </div>
                 {% endfor %}
                 <p class="text-xl my-2 font-bold">Прикладные материалы
