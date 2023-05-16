@@ -26,10 +26,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class GroupController extends AbstractController
 {
     #[Route('/', name: 'app_group_index', methods: ['GET'])]
-    public function index(GroupRepository $groupRepository): Response
+    public function index(Request $request, TagRepository $tagRepository, GroupRepository $groupRepository): Response
     {
+        if ($request->query->has('tag')) {
+            $tag = $tagRepository->findOneBy(['name' => $request->query->get('tag')]);
+            $groups = $groupRepository->findGroupsByTags($tag);
+        } else {
+            $groups = $groupRepository->findAll();
+        }
+
         return $this->render('group/index.html.twig', [
-            'groups' => $groupRepository->findAll(),
+            'groups' => $groups,
         ]);
     }
 

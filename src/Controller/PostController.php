@@ -17,10 +17,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class PostController extends AbstractController
 {
     #[Route('/', name: 'app_post_index', methods: ['GET'])]
-    public function index(PostRepository $postRepository): Response
+    public function index(Request $request, PostRepository $postRepository, TagRepository $tagRepository): Response
     {
+        if ($request->query->has('tag')) {
+            $tag = $tagRepository->findOneBy(['name' => $request->query->get('tag')]);
+            $posts = $postRepository->findPostsByTags($tag);
+        } else {
+            $posts = $postRepository->findAll();
+        }
+
         return $this->render('post/index.html.twig', [
-            'posts' => $postRepository->findAll(),
+            'posts' => $posts,
         ]);
     }
 

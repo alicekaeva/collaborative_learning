@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Post;
+use App\Entity\Tag;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -78,6 +79,16 @@ class PostRepository extends ServiceEntityRepository
             ->where('f = :user')
             ->setParameter('user',
                 $user instanceof User ? $user->getId() : $user)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findPostsByTags(Tag $tag): array
+    {
+        return $this->createQueryBuilder('p')
+            ->join('p.tags', 't')
+            ->where(':tag MEMBER OF p.tags')
+            ->setParameter('tag', $tag)
             ->getQuery()
             ->getResult();
     }

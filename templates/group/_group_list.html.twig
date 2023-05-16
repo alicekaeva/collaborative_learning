@@ -9,7 +9,9 @@
                 <div>
                     <div class="badge badge-outline bg-green-200">{{ group.tags[0].category.name }}</div>
                     {% for tag in group.tags %}
-                        <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
+                        <a href="{{ path('app_group_index', {'tag': tag.name == app.request.query.get('tag') ? null : tag.name}) }}"
+                           class="badge badge-outline bg-fuchsia-200"
+                        >{{ tag.name }}</a>
                     {% endfor %}
                     {% if is_granted('IS_AUTHENTICATED_FULLY') %}
                         <div class="badge badge-outline">Студентов: {{ group.students.count }}

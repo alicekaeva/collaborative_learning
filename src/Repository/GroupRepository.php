@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Group;
+use App\Entity\Tag;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -69,6 +70,16 @@ class GroupRepository extends ServiceEntityRepository
             ->join('g.tags', 't')
             ->where('t IN (:tags)')
             ->setParameter('tags', $tags)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findGroupsByTags(Tag $tag): array
+    {
+        return $this->createQueryBuilder('g')
+            ->join('g.tags', 't')
+            ->where(':tag MEMBER OF g.tags')
+            ->setParameter('tag', $tag)
             ->getQuery()
             ->getResult();
     }
