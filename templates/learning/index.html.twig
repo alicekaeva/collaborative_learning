@@ -239,7 +239,7 @@
                                 <p class="text-xl font-semibold mb-3">{{ meeting.name }}</p>
                                 <p><b>Повестка дня: </b>{{ meeting.agenda }}</p>
                                 {% if meeting.link %}
-                                    <a href="{{ meeting.link }}"><b>Ссылка на задание</b></a>
+                                    <a href="{{ meeting.link }}"><b>Ссылка на собрание</b></a>
                                 {% endif %}
                                 <p class="text-red-500"><b>Дата проведения: </b>{{ meeting.heldOn|date('H:i d/m/Y') }}
                                 </p>
