@@ -70,9 +70,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'user', targetEntity: Admin::class, cascade: ['persist', 'remove'])]
     private ?Admin $admin;
 
-    #[ORM\Column(length: 500, nullable: true)]
-    private ?string $interests = null;
-
     public function __construct()
     {
         $this->tags = new ArrayCollection();
@@ -106,7 +103,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -352,18 +349,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $message->setSender(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getInterests(): ?string
-    {
-        return $this->interests;
-    }
-
-    public function setInterests(?string $interests): self
-    {
-        $this->interests = $interests;
 
         return $this;
     }
