@@ -60,7 +60,7 @@
         });
 
         const categoryId = categorySelect.value;
-        fetch(`/get_tags/${categoryId}`)
+        fetch(`/tag/get_tags/${categoryId}`)
             .then((response) => response.json())
             .then((tags) => {
                 tagsSelect.innerHTML = '';
