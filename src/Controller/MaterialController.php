@@ -83,14 +83,7 @@ class MaterialController extends AbstractController
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $slugger->slug($originalFilename);
             $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
-
-            try {
-                $file->move(
-                    $this->getParameter('material_directory'),
-                    $newFilename
-                );
-            } catch (FileException $e) {
-            }
+            $file->move($this->getParameter('material_directory'), $newFilename);
             $material->setFileLink($newFilename);
 
             $materialRepository->save($material, true);
@@ -133,14 +126,7 @@ class MaterialController extends AbstractController
             $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
             $safeFilename = $slugger->slug($originalFilename);
             $newFilename = $safeFilename . '-' . uniqid() . '.' . $file->guessExtension();
-
-            try {
-                $file->move(
-                    $this->getParameter('material_directory'),
-                    $newFilename
-                );
-            } catch (FileException $e) {
-            }
+            $file->move($this->getParameter('material_directory'), $newFilename);
             $material->setFileLink($newFilename);
 
             $materialRepository->save($material, true);
