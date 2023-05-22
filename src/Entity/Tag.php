@@ -147,6 +147,6 @@ class Tag
 
     public function __toString()
     {
-        return $this->getName() . PHP_EOL;
+        return $this->getName();
     }
 }
