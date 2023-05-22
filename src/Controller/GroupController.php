@@ -134,6 +134,7 @@ class GroupController extends AbstractController
         $receiverId = $request->request->get('receiver_id');
         $receiver = $userRepository->findOneBy(['id' => $receiverId]);
         $groupName = $request->request->get('group_name');
+        $groupName = preg_replace('/[^A-Za-zА-Яа-я0-9\s]/u', '', $groupName);
         $content = 'Привет! Я хочу присоединиться к вашей группе ' . $groupName . '. Можешь добавить меня?';
 
         $message = new Message();
