@@ -17,11 +17,16 @@ class MeetingType extends AbstractType
     {
         $builder
             ->add('name', TextType::class)
-            ->add('agenda', TextareaType::class)
-            ->add('link', UrlType::class)
+            ->add('agenda', TextareaType::class, [
+                'required'=> false
+            ])
+            ->add('link', UrlType::class, [
+                'required'=> false
+            ])
             ->add('heldOn', DateTimeType::class,
                 [
                     'widget' => 'single_text',
+                    'input' => 'datetime_immutable',
                 ])
         ;
     }

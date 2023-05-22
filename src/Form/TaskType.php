@@ -23,8 +23,12 @@ class TaskType extends AbstractType
             ->add('deadline', DateTimeType::class,
                 [
                     'widget' => 'single_text',
+                    'input' => 'datetime_immutable',
+                    'required'=> false
                 ])
-            ->add('points', IntegerType::class);
+            ->add('points', IntegerType::class, [
+                'required'=> false
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

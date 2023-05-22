@@ -80,7 +80,7 @@
                     </div>
                 </form>
             </div>
-            <div class="w-1/4 flex flex-col justify-start items-center h-full">
+            <div class="w-1/4 flex flex-col justify-start items-center overflow-y-auto h-full">
                 <div class="card card-side bg-base-100 shadow w-4/5">
                     <div class="card-body">
                         <p class="card-title">{{ activeGroup.info }}</p>
@@ -168,8 +168,12 @@
                                 {% if task.link %}
                                     <a href="{{ task.link }}"><b>Ссылка на задание</b></a>
                                 {% endif %}
-                                <p class="text-red-500"><b>Дедлайн: </b>{{ task.deadline|date('H:i d/m/Y') }}</p>
-                                <p><b>Количество очков: </b>{{ task.points }}</p>
+                                {% if task.deadline %}
+                                    <p class="text-red-500"><b>Дедлайн: </b>{{ task.deadline|date('H:i d/m/Y') }}</p>
+                                {% endif %}
+                                {% if task.points %}
+                                    <p><b>Количество очков: </b>{{ task.points }}</p>
+                                {% endif %}
                             </div>
                         </div>
                         {% for teacher in activeGroup.teachers %}
@@ -207,8 +211,12 @@
                                 <label for="my-modal-goal-{{ goal.id }}"
                                        class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
                                 <p class="text-xl font-semibold mb-3">{{ goal.name }}</p>
-                                <p class="text-red-500"><b>Дедлайн: </b>{{ goal.deadline|date('H:i d/m/Y') }}</p>
-                                <p><b>Количество очков: </b>{{ goal.points }}</p>
+                                {% if goal.deadline %}
+                                    <p class="text-red-500"><b>Дедлайн: </b>{{ goal.deadline|date('d/m/Y') }}</p>
+                                {% endif %}
+                                {% if goal.points %}
+                                    <p><b>Количество очков: </b>{{ goal.points }}</p>
+                                {% endif %}
                             </div>
                         </div>
                         {% for teacher in activeGroup.teachers %}
@@ -237,7 +245,9 @@
                                 <label for="my-modal-meeting-{{ meeting.id }}"
                                        class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
                                 <p class="text-xl font-semibold mb-3">{{ meeting.name }}</p>
-                                <p><b>Повестка дня: </b>{{ meeting.agenda }}</p>
+                                {% if meeting.agenda %}
+                                    <p><b>Повестка дня: </b>{{ meeting.agenda }}</p>
+                                {% endif %}
                                 {% if meeting.link %}
                                     <a href="{{ meeting.link }}"><b>Ссылка на собрание</b></a>
                                 {% endif %}
@@ -280,8 +290,10 @@
                                 <div class="flex flex-row">
                                     {% set fileUrl = asset('uploads/materials/' ~ material.fileLink) %}
                                     <div class="flex flex-row mt-1">
-                                        <a class="btn btn-xs mr-2" href="{{ fileUrl }}" target="_blank">Посмотреть файл</a>
-                                        <a class="btn btn-xs" href="{{ fileUrl }}" download="{{ material.name }}">Скачать файл</a>
+                                        <a class="btn btn-xs mr-2" href="{{ fileUrl }}" target="_blank">Посмотреть
+                                            файл</a>
+                                        <a class="btn btn-xs" href="{{ fileUrl }}" download="{{ material.name }}">Скачать
+                                            файл</a>
                                     </div>
                                 </div>
                             </div>

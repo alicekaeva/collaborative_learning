@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\MeetingRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: MeetingRepository::class)]
@@ -22,8 +23,8 @@ class Meeting
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $link = null;
 
-    #[ORM\Column(type: 'datetime')]
-    private ?\DateTimeInterface $heldOn = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private ?\DateTimeImmutable $heldOn = null;
 
     #[ORM\ManyToOne(inversedBy: 'meetings')]
     #[ORM\JoinColumn(nullable: false)]
@@ -70,12 +71,12 @@ class Meeting
         return $this;
     }
 
-    public function getHeldOn(): ?\DateTimeInterface
+    public function getHeldOn(): ?\DateTimeImmutable
     {
         return $this->heldOn;
     }
 
-    public function setHeldOn(\DateTimeInterface $heldOn): self
+    public function setHeldOn(\DateTimeImmutable $heldOn): self
     {
         $this->heldOn = $heldOn;
 

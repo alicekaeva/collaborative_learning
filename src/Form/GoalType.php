@@ -19,8 +19,12 @@ class GoalType extends AbstractType
             ->add('deadline', DateType::class,
                 [
                     'widget' => 'single_text',
+                    'input' => 'datetime_immutable',
+                    'required' => false
                 ])
-            ->add('points', IntegerType::class);
+            ->add('points', IntegerType::class, [
+                'required' => false
+            ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\GoalRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: GoalRepository::class)]
@@ -23,8 +24,8 @@ class Goal
     #[ORM\Column(nullable: true)]
     private ?int $points = null;
 
-    #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $deadline = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $deadline = null;
 
     #[ORM\Column]
     private ?bool $completed = null;
@@ -70,12 +71,12 @@ class Goal
         return $this;
     }
 
-    public function getDeadline(): ?\DateTimeInterface
+    public function getDeadline(): ?\DateTimeImmutable
     {
         return $this->deadline;
     }
 
-    public function setDeadline(?\DateTimeInterface $deadline): self
+    public function setDeadline(?\DateTimeImmutable $deadline): self
     {
         $this->deadline = $deadline;
 
