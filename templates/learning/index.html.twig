@@ -193,7 +193,7 @@
                         {% if goal.completed %}
                             <a class="mx-1" href="{{ path('app_uncomplete', { id: goal.id }) }}"><i
                                         class="fa-solid fa-square-check"></i></a>
-                            <label class="cursor-pointer"
+                            <label class="cursor-pointer line-through"
                                    for="my-modal-goal-{{ goal.id }}">{{ goal.name|slice(0, 35) ~ (goal.name|length > 35 ? '...' : '') }}</label>
                         {% else %}
                             <a class="mx-1" href="{{ path('app_complete', { id: goal.id }) }}"><i

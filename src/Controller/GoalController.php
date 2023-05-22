@@ -39,7 +39,7 @@ class GoalController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $goal->setCreator($group);
-            $goal->setCompleted(0);
+            $goal->setCompleted(false);
             $goalRepository->save($goal, true);
 
             return $this->redirectToRoute('app_learning_show', ['id' => $groupId]);
@@ -90,7 +90,7 @@ class GoalController extends AbstractController
     #[Route('/complete/{id}', name: 'app_complete')]
     public function complete(Goal $goal, GoalRepository $goals, Request $request): Response
     {
-        $goal->setCompleted(1);
+        $goal->setCompleted(true);
         $goals->save($goal, true);
 
         return $this->redirect($request->headers->get('referer'));
@@ -99,7 +99,7 @@ class GoalController extends AbstractController
     #[Route('/uncomplete/{id}', name: 'app_uncomplete')]
     public function uncomplete(Goal $goal, GoalRepository $goals, Request $request): Response
     {
-        $goal->setCompleted(0);
+        $goal->setCompleted(false);
         $goals->save($goal, true);
 
         return $this->redirect($request->headers->get('referer'));
