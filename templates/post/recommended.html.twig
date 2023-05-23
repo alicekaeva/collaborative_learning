@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Объявления{% endblock %}
+{% block button %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <div class="flex justify-end">
+            <a class="btn mr-2" href="{{ path('app_post_show', {'id': app.user.id}) }}">Мои объявления</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {{ include ('post/_post_tabs.html.twig') }}
+    {% endif %}
+    {{ include ('post/_post_list.html.twig') }}
+    {% if app.user.tags|length == 0 %}
+        <div class="flex justify-center items-center">
+            <div class="w-3/5 m-5 alert shadow-lg">
+                <div>
+                    <i class="fa-solid fa-circle-info fa-xl"></i>
+                    <span>Чтобы получать более точные рекомендации по объявлениям и группам, укажите Ваши интересы</span>
+                </div>
+                <div class="flex-none">
+                    <a class="btn btn-sm" href="{{ path('app_user_edit', {'id': app.user.id}) }}">Перейти</a>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

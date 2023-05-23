@@ -1,13 +1,31 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Material{% endblock %}
+{% block title %}Редактирование прикладного материалa{% endblock %}
 
 {% block body %}
-    <h1>Edit Material</h1>
-
-    {{ include('material/_form.html.twig', {'button_label': 'Update'}) }}
-
-    <a href="{{ path('app_material_index') }}">back to list</a>
-
-    {{ include('material/_delete_form.html.twig') }}
+    <h1 class="ml-5 text-xl mt-5">Редактирование прикладного материалa</h1>
+    {{ form_start(form) }}
+    <div class="flex flex-col w-96 m-5">
+        <div>
+            {{ form_label(form.name, 'Название', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.name, {'attr': {'class': 'block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.name) }}
+        </div>
+        <div>
+            {{ form_widget(form.fileLink, {'attr': {'class': 'file-input w-full max-w-xs mt-1 mb-2'}}) }}
+            {{ form_errors(form.fileLink) }}
+        </div>
+        <div>
+            {{ form_label(form.mimeType, 'Тип файла', {'label_attr': {'class': 'block text-sm text-gray-700 font-medium'}}) }}
+            {{ form_widget(form.mimeType, {'attr': {'class': 'select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2'}}) }}
+            {{ form_errors(form.mimeType) }}
+        </div>
+        <div class="flex flex-row my-2">
+            <label class="block text-sm text-gray-700 font-medium mr-2">Приватный материал</label>
+            {{ form_widget(form.isPrivate, {'attr': {'class': 'checkbox'}}) }}
+            {{ form_errors(form.isPrivate) }}
+        </div>
+        <button type="submit" class="btn btn-outline w-full">Редактировать</button>
+    </div>
+    {{ form_end(form) }}
 {% endblock %}

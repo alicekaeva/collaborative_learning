@@ -1,13 +1,94 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Group{% endblock %}
+{% block title %}Редактирование группы{% endblock %}
 
 {% block body %}
-    <h1>Edit Group</h1>
+    <h1 class="ml-5 text-xl">Редактирование группы</h1>
+    <div class="flex flex-col w-96 m-5">
+        <div class="form-control w-full">
+            <form method="post" action="{{ path('app_group_edit', {'id': group.id}) }}">
+                <label class="block text-sm text-gray-700 font-medium" for="name">
+                    Название
+                </label>
+                <input type="text" id="name" name="group_name" required
+                       class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2" value={{ group.name }}>
+                <label class="block text-sm text-gray-700 font-medium" for="info">
+                    Описание
+                </label>
+                <textarea id="info" name="info" required
+                          class="textarea textarea-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">{{ group.info }}</textarea>
+                <label class="block text-sm text-gray-700 font-medium" for="teachers">
+                    Требуемое количество преподавателей
+                </label>
+                <input type="number" id="teachers" name="teachers" required min="1" max="3"
+                       class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2" value={{ group.requiredTeachers }}>
+                <label class="block text-sm text-gray-700 font-medium" for="students">
+                    Требуемое количество студентов
+                </label>
+                <input type="number" id="students" name="students" required
+                       class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2" value={{ group.requiredStudents }}>
+                <label class="block text-sm text-gray-700 font-medium" for="category">
+                    Категория
+                </label>
+                <select id="category" name='category' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                    <option disabled selected
+                            value={{ group.tags[0].category.id }}>{{ group.tags[0].category.name }}</option>
+                </select>
+                <div class="flex flex-row justify-between">
+                    <label class="block text-sm text-gray-700 font-medium" for="tags">
+                        Теги
+                    </label>
+                    <label for="new-tag-3"><i class="fa-solid fa-circle-plus fa-xl"
+                                               style="color: #333b4d;"></i></label>
+                </div>
+                <select id="tags" multiple name='tags[]' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                </select>
+                {% for tag in group.tags %}
+                    <input type="hidden" name="tag_id" value="{{ tag.id }}">
+                {% endfor %}
+                <button type="submit" class="btn btn-outline w-full">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="new-tag-3" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="new-tag-3" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить тег</h3>
+            <form method="post" action="{{ path('app_tag_new') }}">
+                <input type="hidden" name="category" value="{{ group.tags[0].category.id }}">
+                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <button type="submit" class="btn btn-outline">Добавить</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const categorySelect = document.querySelector('select[name="category"]');
+        const tagsSelect = document.querySelector('select[name="tags[]"]');
+        const chosenTags = document.querySelectorAll('input[name="tag_id"]');
+        const tagIds = [];
 
-    {{ include('group/_form.html.twig', {'button_label': 'Update'}) }}
+        chosenTags.forEach((tag) => {
+            tagIds.push(parseInt(tag.value));
+        });
 
-    <a href="{{ path('app_group_index') }}">back to list</a>
-
-    {{ include('group/_delete_form.html.twig') }}
+        const categoryId = categorySelect.value;
+        fetch(`/tag/get_tags/${categoryId}`)
+            .then((response) => response.json())
+            .then((tags) => {
+                tagsSelect.innerHTML = '';
+                tags.forEach((tag) => {
+                    const option = document.createElement('option');
+                    option.value = tag.id;
+                    option.textContent = tag.name;
+                    if (tagIds.includes(tag.id)) {
+                        option.selected = true;
+                    }
+                    tagsSelect.appendChild(option);
+                });
+            })
+            .catch((error) => console.error(error));
+    </script>
 {% endblock %}

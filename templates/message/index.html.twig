@@ -1,39 +1,65 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Message index{% endblock %}
+{% block title %}Сообщения{% endblock %}
+{% block button %}{% endblock %}
 
 {% block body %}
-    <h1>Message index</h1>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Content</th>
-                <th>IsPinned</th>
-                <th>SendingDate</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for message in messages %}
-            <tr>
-                <td>{{ message.id }}</td>
-                <td>{{ message.content }}</td>
-                <td>{{ message.isPinned ? 'Yes' : 'No' }}</td>
-                <td>{{ message.sendingDate ? message.sendingDate|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_message_show', {'id': message.id}) }}">show</a>
-                    <a href="{{ path('app_message_edit', {'id': message.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
+    <div class="flex flex-row border-y-2" style="height: calc(100vh - 69px)">
+    <div class="w-2/5 flex flex-col justify-start items-center overflow-y-auto border-r-2">
+        {% for dialog in dialogs %}
+            <div class="card w-96
+                {% if activeUser and activeUser.fullName == dialog.fullName %}bg-base-200{% else %}bg-base-100{% endif %} shadow m-3">
+                <div class="card-body">
+                    <a href="{{ path('app_message_show', {'id': dialog.id}) }}"
+                       class="card-title">{{ dialog.fullName }}</a>
+                </div>
+            </div>
         {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_message_new') }}">Create new</a>
+    </div>
+    {% if activeUser %}
+        {% if chat is empty %}
+            <p>Нет сообщений.</p>
+        {% else %}
+            <div class="w-3/5 flex flex-col justify-end items-center h-full">
+            <div class="w-2/3 justify-end overflow-y-auto" id="myDiv">
+            {% for message in chat %}
+                {% if message.sender == app.user %}
+                    <div class="chat chat-end">
+                        <div class="chat-header">
+                            <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                            {{ message.sender.fullName }}
+                        </div>
+                        <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
+                    </div>
+                {% else %}
+                    <div class="chat chat-start">
+                        <div class="chat-header">
+                            <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                            {{ message.sender.fullName }}
+                        </div>
+                        <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        </div>
+        <form method="post" action="{{ path('app_message_send') }}" class="w-2/3">
+            <input type="hidden" name="receiver_id" value="{{ activeUser.id }}">
+            <div class="flex flex-row justify-center items-center mt-3 mb-1">
+                <input type="text" placeholder="Введите сообщение" class="input input-bordered w-full max-w-lg mr-3"
+                       id="content" name="content" required/>
+                <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i></button>
+            </div>
+        </form>
+        </div>
+        </div>
+    {% else %}
+        <div class="w-3/5 flex justify-center items-center h-full text-2xl">
+            Выберите чат.
+        </div>
+    {% endif %}
+    <script>
+        const myDiv = document.getElementById("myDiv");
+        myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;
+    </script>
 {% endblock %}

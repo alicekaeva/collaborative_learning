@@ -1,41 +1,8 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Material index{% endblock %}
+{% block title %}Прикладные материалы{% endblock %}
 
 {% block body %}
-    <h1>Material index</h1>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>FileLink</th>
-                <th>MimeType</th>
-                <th>IsPrivate</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for material in materials %}
-            <tr>
-                <td>{{ material.id }}</td>
-                <td>{{ material.name }}</td>
-                <td>{{ material.fileLink }}</td>
-                <td>{{ material.mimeType }}</td>
-                <td>{{ material.isPrivate ? 'Yes' : 'No' }}</td>
-                <td>
-                    <a href="{{ path('app_material_show', {'id': material.id}) }}">show</a>
-                    <a href="{{ path('app_material_edit', {'id': material.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_material_new') }}">Create new</a>
+    {{ include ('material/_material_tabs.html.twig') }}
+    {{ include ('material/_material_list.html.twig') }}
 {% endblock %}

@@ -1,11 +1,92 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Post{% endblock %}
+{% block title %}Создание объявления{% endblock %}
 
 {% block body %}
-    <h1>Create new Post</h1>
+    <h1 class="ml-5 text-xl">Создание объявления</h1>
+    <div class="flex flex-col w-96 m-5">
+        <div class="form-control w-full">
+            <form method="post" action="{{ path('app_post_new') }}">
+                <label class="block text-sm text-gray-700 font-medium" for="content">
+                    Описание
+                </label>
+                <textarea id="content" name="content" required
+                          class="textarea textarea-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"></textarea>
+                <div class="flex flex-row justify-between">
+                    <label class="block text-sm text-gray-700 font-medium" for="category">
+                        Категория
+                    </label>
+                    <label for="new-category-1"><i class="fa-solid fa-circle-plus fa-xl"
+                                               style="color: #333b4d;"></i></label>
+                </div>
+                <select id="category" name='category' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                    <option disabled selected>Выберите категорию</option>
+                    {% for category in categories %}
+                        <option value={{ category.id }}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <div class="flex flex-row justify-between">
+                    <label class="block text-sm text-gray-700 font-medium" for="tags">
+                        Теги
+                    </label>
+                    <label for="new-tag-1"><i class="fa-solid fa-circle-plus fa-xl"
+                                               style="color: #333b4d;"></i></label>
+                </div>
+                <select multiple id="tags" name='tags[]' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                    <option disabled selected>Выберите категорию, чтобы увидеть теги</option>
+                </select>
+                <button type="submit" class="btn btn-outline w-full">Создать</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="new-category-1" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="new-category-1" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить категорию</h3>
+            <form method="post" action="{{ path('app_category_new') }}">
+                <input type="text" name="new_category" class="input input-bordered max-w-xs"/>
+                <button type="submit" class="btn btn-outline">Добавить</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="new-tag-1" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="new-tag-1" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить тег</h3>
+            <form method="post" action="{{ path('app_tag_new') }}">
+                <select name='category' class="select select-bordered w-full mt-2 max-w-xs">
+                    <option disabled selected>Выберите категорию</option>
+                    {% for category in categories %}
+                        <option value={{ category.id }}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <button type="submit" class="btn btn-outline">Добавить</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const categorySelect = document.querySelector('select[name="category"]');
+        const tagsSelect = document.querySelector('select[name="tags[]"]');
 
-    {{ include('post/_form.html.twig') }}
-
-    <a href="{{ path('app_post_index') }}">back to list</a>
+        categorySelect.addEventListener('change', (event) => {
+            const categoryId = event.target.value;
+            fetch(`/tag/get_tags/${categoryId}`)
+                .then((response) => response.json())
+                .then((tags) => {
+                    tagsSelect.innerHTML = '';
+                    tags.forEach((tag) => {
+                        const option = document.createElement('option');
+                        option.value = tag.id;
+                        option.textContent = tag.name;
+                        tagsSelect.appendChild(option);
+                    });
+                })
+                .catch((error) => console.error(error));
+        });
+    </script>
 {% endblock %}

@@ -1,41 +1,17 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Group index{% endblock %}
+{% block title %}Группы{% endblock %}
+{% block button %}
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        <div class="flex justify-end">
+            <a class="btn mr-2" href="{{ path('app_group_new') }}">Создать группу</a>
+        </div>
+    {% endif %}
+{% endblock %}
 
 {% block body %}
-    <h1>Group index</h1>
-
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>Info</th>
-                <th>RequiredTeachers</th>
-                <th>RequiredStudents</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for group in groups %}
-            <tr>
-                <td>{{ group.id }}</td>
-                <td>{{ group.name }}</td>
-                <td>{{ group.info }}</td>
-                <td>{{ group.requiredTeachers }}</td>
-                <td>{{ group.requiredStudents }}</td>
-                <td>
-                    <a href="{{ path('app_group_show', {'id': group.id}) }}">show</a>
-                    <a href="{{ path('app_group_edit', {'id': group.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_group_new') }}">Create new</a>
+    {% if is_granted('IS_AUTHENTICATED_FULLY') %}
+        {{ include ('group/_group_tabs.html.twig') }}
+    {% endif %}
+    {{ include ('group/_group_list.html.twig') }}
 {% endblock %}

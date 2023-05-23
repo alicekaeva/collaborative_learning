@@ -17,7 +17,7 @@ class Message
     #[ORM\Column(length: 1000)]
     private ?string $content = null;
 
-    #[ORM\Column]
+    #[ORM\Column(nullable: true)]
     private ?bool $isPinned = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]

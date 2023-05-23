@@ -1,13 +1,79 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Post{% endblock %}
+{% block title %}Редактирование объявления{% endblock %}
 
 {% block body %}
-    <h1>Edit Post</h1>
+    <h1 class="ml-5 text-xl">Редактирование объявления</h1>
+    <div class="flex flex-col w-96 m-5">
+        <div class="form-control w-full">
+            <form method="post" action="{{ path('app_post_edit', {'id': post.id}) }}">
+                <label class="block text-sm text-gray-700 font-medium" for="content">
+                    Описание
+                </label>
+                <textarea id="content" name="content" required
+                          class="textarea textarea-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">{{ post.content }}</textarea>
+                <label class="block text-sm text-gray-700 font-medium" for="category">
+                    Категория
+                </label>
+                <select id="category" name='category' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                    <option disabled selected
+                            value={{ post.tags[0].category.id }}>{{ post.tags[0].category.name }}</option>
+                </select>
+                <div class="flex flex-row justify-between">
+                    <label class="block text-sm text-gray-700 font-medium" for="tags">
+                        Теги
+                    </label>
+                    <label for="new-tag-2"><i class="fa-solid fa-circle-plus fa-xl"
+                                               style="color: #333b4d;"></i></label>
+                </div>
+                <select id="tags" multiple name='tags[]' required
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                </select>
+                {% for tag in post.tags %}
+                    <input type="hidden" name="tag_id" value="{{ tag.id }}">
+                {% endfor %}
+                <button type="submit" class="btn btn-outline w-full">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="new-tag-2" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="new-tag-2" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить тег</h3>
+            <form method="post" action="{{ path('app_tag_new') }}">
+                <input type="hidden" name="category" value="{{ post.tags[0].category.id }}">
+                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <button type="submit" class="btn btn-outline">Добавить</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const categorySelect = document.querySelector('select[name="category"]');
+        const tagsSelect = document.querySelector('select[name="tags[]"]');
+        const chosenTags = document.querySelectorAll('input[name="tag_id"]');
+        const tagIds = [];
 
-    {{ include('post/_form.html.twig', {'button_label': 'Update'}) }}
+        chosenTags.forEach((tag) => {
+            tagIds.push(parseInt(tag.value));
+        });
 
-    <a href="{{ path('app_post_index') }}">back to list</a>
-
-    {{ include('post/_delete_form.html.twig') }}
+        const categoryId = categorySelect.value;
+        fetch(`/tag/get_tags/${categoryId}`)
+            .then((response) => response.json())
+            .then((tags) => {
+                tagsSelect.innerHTML = '';
+                tags.forEach((tag) => {
+                    const option = document.createElement('option');
+                    option.value = tag.id;
+                    option.textContent = tag.name;
+                    if (tagIds.includes(tag.id)) {
+                        option.selected = true;
+                    }
+                    tagsSelect.appendChild(option);
+                });
+            })
+            .catch((error) => console.error(error));
+    </script>
 {% endblock %}

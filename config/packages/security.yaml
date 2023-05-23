@@ -32,18 +32,28 @@ security:
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/category, roles: ROLE_USER }
-        - { path: ^/goal, roles: ROLE_TEACHER }
-        - { path: ^/material, roles: [ROLE_STUDENT, ROLE_TEACHER] }
+        - { path: ^/goal/new, roles: ROLE_TEACHER }
+        - { path: ^/goal/\d+/edit, roles: ROLE_TEACHER }
+        - { path: ^/goal/\d+, roles: ROLE_TEACHER }
+        - { path: ^/material, roles: ROLE_USER }
         - { path: ^/media, roles: ROLE_USER }
-        - { path: ^/meeting, roles: ROLE_TEACHER }
+        - { path: ^/meeting/new, roles: ROLE_TEACHER }
+        - { path: ^/meeting/\d+/edit, roles: ROLE_TEACHER }
+        - { path: ^/meeting/\d+, roles: ROLE_TEACHER }
         - { path: ^/message, roles: ROLE_USER }
         - { path: ^/student, roles: ROLE_STUDENT }
         - { path: ^/tag, roles: ROLE_USER }
-        - { path: ^/task, roles: ROLE_TEACHER }
+        - { path: ^/task/new, roles: ROLE_TEACHER }
+        - { path: ^/task/\d+/edit, roles: ROLE_TEACHER }
+        - { path: ^/task/\d+, roles: ROLE_TEACHER }
         - { path: ^/teacher, roles: ROLE_TEACHER }
-        - { path: ^/user, roles: ROLE_USER }
-#        - { path: ^/login, roles: ROLE_USER }
-#        - { path: ^/register, roles: ROLE_USER }
+        - { path: ^/user/earn_points, roles: ROLE_TEACHER }
+        - { path: ^/group/\d+/management, roles: ROLE_ADMIN}
+        - { path: ^/group/\d+/edit, roles: ROLE_ADMIN}
+        - { path: ^/group/\d+, roles: ROLE_ADMIN}
+        - { path: ^/group/add_user, roles: ROLE_ADMIN}
+        - { path: ^/group/edit_user, roles: ROLE_ADMIN}
+        - { path: ^/group/delete_user, roles: ROLE_ADMIN}
 
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER

@@ -2,7 +2,10 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Group;
+use App\Entity\Tag;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -11,7 +14,6 @@ use Doctrine\Persistence\ManagerRegistry;
  *
  * @method Group|null find($id, $lockMode = null, $lockVersion = null)
  * @method Group|null findOneBy(array $criteria, array $orderBy = null)
- * @method Group[]    findAll()
  * @method Group[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class GroupRepository extends ServiceEntityRepository
@@ -39,28 +41,58 @@ class GroupRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Group[] Returns an array of Group objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('g.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder('g')
+            ->addSelect('t', 'c')
+            ->join('g.tags', 't')
+            ->join('t.category', 'c')
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Group
-//    {
-//        return $this->createQueryBuilder('g')
-//            ->andWhere('g.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findAllGroupsForUser(User $user)
+    {
+        $qb = $this->createQueryBuilder('g')
+            ->leftJoin('g.students', 's')
+            ->leftJoin('g.teachers', 't')
+            ->leftJoin('g.administrator', 'a')
+            ->where('s.user = :user')
+            ->orWhere('t.user = :user')
+            ->orWhere('a.user = :user')
+            ->setParameter('user', $user);
+
+        return $qb->getQuery()->getResult();
+    }
+
+    public function findRecommendedGroups(array $tags): array
+    {
+        return $this->createQueryBuilder('g')
+            ->join('g.tags', 't')
+            ->where('t IN (:tags)')
+            ->setParameter('tags', $tags)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findGroupsByTag(Tag $tag): array
+    {
+        return $this->createQueryBuilder('g')
+            ->join('g.tags', 't')
+            ->where(':tag MEMBER OF g.tags')
+            ->setParameter('tag', $tag)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findGroupsByCategory(Category $category): array
+    {
+        return $this->createQueryBuilder('g')
+            ->join('g.tags', 't')
+            ->join('t.category', 'c')
+            ->where('c.id = :category_id')
+            ->setParameter('category_id', $category->getId())
+            ->getQuery()
+            ->getResult();
+    }
 }

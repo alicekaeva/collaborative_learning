@@ -11,7 +11,7 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
+#[UniqueEntity(fields: ['email'], message: 'Пользователь с такой почтой уже существует')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -61,8 +61,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Message::class, orphanRemoval: true)]
     private Collection $messages;
 
-    #[ORM\Column(length: 500, nullable: true)]
-    private ?string $interests = null;
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Student::class, cascade: ['persist', 'remove'])]
+    private ?Student $student;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Teacher::class, cascade: ['persist', 'remove'])]
+    private ?Teacher $teacher;
+
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: Admin::class, cascade: ['persist', 'remove'])]
+    private ?Admin $admin;
 
     public function __construct()
     {
@@ -97,7 +103,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getUserIdentifier(): string
     {
-        return (string) $this->email;
+        return (string)$this->email;
     }
 
     /**
@@ -347,15 +353,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getInterests(): ?string
+    public function getStudent(): ?Student
     {
-        return $this->interests;
+        return $this->student;
     }
 
-    public function setInterests(?string $interests): self
+    public function setStudent(Student $student): self
     {
-        $this->interests = $interests;
+        // set the owning side of the relation if necessary
+        if ($student->getUser() !== $this) {
+            $student->setUser($this);
+        }
+
+        $this->student = $student;
 
         return $this;
+    }
+
+    public function getTeacher(): ?Teacher
+    {
+        return $this->teacher;
+    }
+
+    public function setTeacher(Teacher $teacher): self
+    {
+        // set the owning side of the relation if necessary
+        if ($teacher->getUser() !== $this) {
+            $teacher->setUser($this);
+        }
+
+        $this->teacher = $teacher;
+
+        return $this;
+    }
+
+    public function getAdmin(): ?Admin
+    {
+        return $this->admin;
+    }
+
+    public function setAdmin(Admin $admin): self
+    {
+        // set the owning side of the relation if necessary
+        if ($admin->getUser() !== $this) {
+            $admin->setUser($this);
+        }
+
+        $this->admin = $admin;
+
+        return $this;
+    }
+
+    public function __toString()
+    {
+        return $this->getFullName();
     }
 }

@@ -4,13 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Task;
 use App\Form\TaskType;
+use App\Repository\GroupRepository;
 use App\Repository\TaskRepository;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/task')]
+#[IsGranted('IS_AUTHENTICATED_FULLY')]
 class TaskController extends AbstractController
 {
     #[Route('/', name: 'app_task_index', methods: ['GET'])]
@@ -22,16 +25,23 @@ class TaskController extends AbstractController
     }
 
     #[Route('/new', name: 'app_task_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, TaskRepository $taskRepository): Response
+    public function new(Request $request, TaskRepository $taskRepository, GroupRepository $groupRepository): Response
     {
+        $groupId = $request->cookies->get('currentGroup');
+        $group = $groupRepository->findOneBy(['id' => $groupId]);
+        if (!$group) {
+            return new Response('Receiving group not found.', Response::HTTP_NOT_FOUND);
+        }
+
         $task = new Task();
         $form = $this->createForm(TaskType::class, $task);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $task->setCreator($group);
             $taskRepository->save($task, true);
 
-            return $this->redirectToRoute('app_task_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_learning_show', ['id' => $groupId]);
         }
 
         return $this->renderForm('task/new.html.twig', [
@@ -57,7 +67,7 @@ class TaskController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $taskRepository->save($task, true);
 
-            return $this->redirectToRoute('app_task_index', [], Response::HTTP_SEE_OTHER);
+            return $this->redirectToRoute('app_learning_show', ['id' => $task->getCreator()->getId()]);
         }
 
         return $this->renderForm('task/edit.html.twig', [
@@ -69,10 +79,10 @@ class TaskController extends AbstractController
     #[Route('/{id}', name: 'app_task_delete', methods: ['POST'])]
     public function delete(Request $request, Task $task, TaskRepository $taskRepository): Response
     {
-        if ($this->isCsrfTokenValid('delete'.$task->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $task->getId(), $request->request->get('_token'))) {
             $taskRepository->remove($task, true);
         }
 
-        return $this->redirectToRoute('app_task_index', [], Response::HTTP_SEE_OTHER);
+        return $this->redirect($request->headers->get('referer'));
     }
 }

@@ -1,0 +1,319 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Обучение{% endblock %}
+{% block button %}{% endblock %}
+
+{% block body %}
+    <div class="flex flex-row border-y-2" style="height: calc(100vh - 69px)">
+        <div class="w-1/4 flex flex-col justify-start items-center overflow-y-auto border-r-2">
+            {% for group in groups %}
+                <div class="card w-80
+                {% if activeGroup and activeGroup.name == group.name %}bg-base-200{% else %}bg-base-100{% endif %} shadow m-3">
+                    <div class="card-body">
+                        <a href="{{ path('app_learning_show', {'id': group.id}) }}"
+                           class="card-title">{{ group.name }}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% if activeGroup %}
+            <div class="w-2/4 relative flex flex-col justify-end items-center h-full border-r-2">
+                {% if chat is not empty %}
+                    <div class="absolute left-0 top-0 tooltip tooltip-bottom m-3" data-tip="Закрепленные сообщения">
+                        <label for="pinned-messages" class="cursor-pointer"><i
+                                    class="fa-solid fa-bookmark fa-xl"></i></label>
+                    </div>
+                    <input type="checkbox" id="pinned-messages" class="modal-toggle"/>
+                    <label for="pinned-messages" class="modal cursor-pointer">
+                        <label class="modal-box relative" for="">
+                            {% for message in chat %}
+                                {% if message.isPinned %}
+                                    <div class="pinned bg-base-200 my-2 rounded">{{ message.content|markdown_to_html|sanitize_html }}</div>
+                                {% endif %}
+                            {% endfor %}
+                        </label>
+                    </label>
+                    <div class="w-2/3 justify-end overflow-y-auto" id="myDiv2">
+                        {% for message in chat %}
+                            {% if message.sender == app.user %}
+                                <div class="chat chat-end">
+                                    <div class="chat-header">
+                                        {% if message.isPinned %}
+                                            <a href="{{ path('app_unpin', { id: message.id }) }}"><i
+                                                        class="fa-solid fa-bookmark"></i></a>
+                                        {% else %}
+                                            <a href="{{ path('app_pin', { id: message.id }) }}"><i
+                                                        class="fa-regular fa-bookmark"></i></a>
+                                        {% endif %}
+                                        <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                                        {{ message.sender.fullName }}
+                                    </div>
+                                    <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
+                                </div>
+                            {% else %}
+                                <div class="chat chat-start">
+                                    <div class="chat-header">
+                                        {% if message.isPinned %}
+                                            <a href="{{ path('app_unpin', { id: message.id }) }}"><i
+                                                        class="fa-solid fa-bookmark"></i></a>
+                                        {% else %}
+                                            <a href="{{ path('app_pin', { id: message.id }) }}"><i
+                                                        class="fa-regular fa-bookmark"></i></a>
+                                        {% endif %}
+                                        <time class="text-xs opacity-50">{{ message.sendingDate|date('H:i d/m/Y') }}</time>
+                                        {{ message.sender.fullName }}
+                                    </div>
+                                    <div class="chat-bubble">{{ message.content|markdown_to_html|sanitize_html }}</div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <form method="post" action="{{ path('app_learning_send') }}" class="w-2/3">
+                    <input type="hidden" name="receiver_id" value="{{ activeGroup.id }}">
+                    <div class="flex justify-center items-center mt-3 mb-1">
+                        <input type="text" placeholder="Введите сообщение"
+                               class="input input-bordered w-full max-w-lg mr-3"
+                               id="content" name="content" required/>
+                        <button type="submit"><i class="fa-regular fa-paper-plane fa-xl"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="w-1/4 flex flex-col justify-start items-center overflow-y-auto h-full">
+                <div class="card card-side bg-base-100 shadow w-4/5">
+                    <div class="card-body">
+                        <p class="card-title">{{ activeGroup.info }}</p>
+                        <div class="card-actions flex justify-between">
+                            <div>
+                                <div class="badge badge-outline bg-green-200">{{ activeGroup.tags[0].category.name }}</div>
+                                {% for tag in activeGroup.tags %}
+                                    <div class="badge badge-outline bg-fuchsia-200">{{ tag }}</div>
+                                {% endfor %}
+                                <div class="badge badge-outline">Студентов: {{ activeGroup.students.count }}
+                                    из {{ activeGroup.requiredStudents }}</div>
+                                <div class="badge badge-outline">Преподавателей: {{ activeGroup.teachers.count }}
+                                    из {{ activeGroup.requiredTeachers }}</div>
+                                {% if app.user == activeGroup.administrator.user %}
+                                    <a class="badge badge-outline bg-yellow-200"
+                                       href="{{ path('app_group_edit', {'id': activeGroup.id}) }}">Редактировать
+                                        группу</a>
+                                    <a class="badge badge-outline bg-orange-200"
+                                       href="{{ path('app_group_management', {'id': activeGroup.id}) }}">Управление
+                                        участниками</a>
+                                    {{ include('group/_delete_form.html.twig') }}
+                                {% endif %}
+                                {% for teacher in activeGroup.teachers %}
+                                    {% if app.user == teacher.user %}
+                                        <label class="badge badge-outline bg-orange-200 cursor-pointer"
+                                               for="points">Начислить баллы</label>
+                                        <input type="checkbox" id="points" class="modal-toggle"/>
+                                        <div class="modal">
+                                            <div class="modal-box relative">
+                                                <label for="points"
+                                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                                <h3 class="text-lg font-bold">Начислить баллы</h3>
+                                                <form method="post" action="{{ path('app_user_earn_points') }}">
+                                                    <select name="student"
+                                                            class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                                                            required>
+                                                        <option disabled selected>Выберите пользователя</option>
+                                                        {% for student in activeGroup.students %}
+                                                            <option value={{ student.user.id }}>{{ student.user.fullName }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <input type="number" name="points" required="required"
+                                                           class="block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2">
+                                                    <button type="submit" class="btn btn-outline">Начислить</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-xl my-2 font-bold">Участники</p>
+                {% for student in activeGroup.students %}
+                    <a class="hover:underline"
+                       href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}
+                        (Студент)</a>
+                {% endfor %}
+                {% for teacher in activeGroup.teachers %}
+                    <a class="hover:underline"
+                       href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}
+                        (Преподаватель)</a>
+                {% endfor %}
+                <a class="hover:underline"
+                   href="{{ path('app_user_show', {'id': activeGroup.administrator.user.id}) }}">{{ activeGroup.administrator.user.fullName }}
+                    (Администратор)</a>
+                <p class="text-xl my-2 font-bold">Задания
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_task_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% for task in activeGroup.tasks %}
+                    <div class="flex flex-row">
+                        <label class="cursor-pointer"
+                               for="my-modal-task-{{ task.id }}">{{ task.name|slice(0, 35) ~ (task.name|length > 35 ? '...' : '') }}</label>
+                        <input type="checkbox" id="my-modal-task-{{ task.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-task-{{ task.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ task.name }}</p>
+                                {% if task.link %}
+                                    <a href="{{ task.link }}"><b>Ссылка на задание</b></a>
+                                {% endif %}
+                                {% if task.deadline %}
+                                    <p class="text-red-500"><b>Дедлайн: </b>{{ task.deadline|date('H:i d/m/Y') }}</p>
+                                {% endif %}
+                                {% if task.points %}
+                                    <p><b>Количество очков: </b>{{ task.points }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% for teacher in activeGroup.teachers %}
+                            {% if app.user == teacher.user %}
+                                <a class="mx-2" href="{{ path('app_task_edit', {'id': task.id}) }}"><i
+                                            class="fa-regular fa-pen-to-square"></i></a>
+                                {{ include('task/_delete_form.html.twig') }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <p class="text-xl my-2 font-bold">Цели
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_goal_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% for goal in activeGroup.goals %}
+                    <div class="flex flex-row">
+                        {% if goal.completed %}
+                            <a class="mx-1" href="{{ path('app_uncomplete', { id: goal.id }) }}"><i
+                                        class="fa-solid fa-square-check"></i></a>
+                            <label class="cursor-pointer line-through"
+                                   for="my-modal-goal-{{ goal.id }}">{{ goal.name|slice(0, 35) ~ (goal.name|length > 35 ? '...' : '') }}</label>
+                        {% else %}
+                            <a class="mx-1" href="{{ path('app_complete', { id: goal.id }) }}"><i
+                                        class="fa-regular fa-square-check"></i></a>
+                            <label class="cursor-pointer"
+                                   for="my-modal-goal-{{ goal.id }}">{{ goal.name|slice(0, 35) ~ (goal.name|length > 35 ? '...' : '') }}</label>
+                        {% endif %}
+                        <input type="checkbox" id="my-modal-goal-{{ goal.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-goal-{{ goal.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ goal.name }}</p>
+                                {% if goal.deadline %}
+                                    <p class="text-red-500"><b>Дедлайн: </b>{{ goal.deadline|date('d/m/Y') }}</p>
+                                {% endif %}
+                                {% if goal.points %}
+                                    <p><b>Количество очков: </b>{{ goal.points }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% for teacher in activeGroup.teachers %}
+                            {% if app.user == teacher.user %}
+                                <a class="mx-2" href="{{ path('app_goal_edit', {'id': goal.id}) }}"><i
+                                            class="fa-regular fa-pen-to-square"></i></a>
+                                {{ include('goal/_delete_form.html.twig') }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <p class="text-xl my-2 font-bold">Собрания
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_meeting_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% for meeting in activeGroup.meetings %}
+                    <div class="flex flex-row">
+                        <label class="cursor-pointer"
+                               for="my-modal-meeting-{{ meeting.id }}">{{ meeting.name|slice(0, 35) ~ (meeting.name|length > 35 ? '...' : '') }}</label>
+                        <input type="checkbox" id="my-modal-meeting-{{ meeting.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-meeting-{{ meeting.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ meeting.name }}</p>
+                                {% if meeting.agenda %}
+                                    <p><b>Повестка дня: </b>{{ meeting.agenda }}</p>
+                                {% endif %}
+                                {% if meeting.link %}
+                                    <a href="{{ meeting.link }}"><b>Ссылка на собрание</b></a>
+                                {% endif %}
+                                <p class="text-red-500"><b>Дата проведения: </b>{{ meeting.heldOn|date('H:i d/m/Y') }}
+                                </p>
+                            </div>
+                        </div>
+                        {% for teacher in activeGroup.teachers %}
+                            {% if app.user == teacher.user %}
+                                <a class="mx-2" href="{{ path('app_meeting_edit', {'id': meeting.id}) }}"><i
+                                            class="fa-regular fa-pen-to-square"></i></a>
+                                {{ include('meeting/_delete_form.html.twig') }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <p class="text-xl my-2 font-bold">Прикладные материалы
+                    {% for teacher in activeGroup.teachers %}
+                        {% if app.user == teacher.user %}
+                            <a href="{{ path('app_material_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                    {% for student in activeGroup.students %}
+                        {% if app.user == student.user %}
+                            <a href="{{ path('app_material_new') }}"><i class="fa-solid fa-circle-plus"></i></a>
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                {% for material in activeGroup.materials %}
+                    <div class="flex flex-row">
+                        <label class="cursor-pointer"
+                               for="my-modal-material-{{ material.id }}">{{ material.name|slice(0, 35) ~ (material.name|length > 35 ? '...' : '') }}</label>
+                        <input type="checkbox" id="my-modal-material-{{ material.id }}" class="modal-toggle"/>
+                        <div class="modal">
+                            <div class="modal-box relative">
+                                <label for="my-modal-material-{{ material.id }}"
+                                       class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+                                <p class="text-xl font-semibold mb-3">{{ material.name }}</p>
+                                <p><b>Создатель: </b>{{ material.creatorUser.fullName }}</p>
+                                <div class="flex flex-row">
+                                    {% set fileUrl = asset('uploads/materials/' ~ material.fileLink) %}
+                                    <div class="flex flex-row mt-1">
+                                        <a class="btn btn-xs mr-2" href="{{ fileUrl }}" target="_blank">Посмотреть
+                                            файл</a>
+                                        <a class="btn btn-xs" href="{{ fileUrl }}" download="{{ material.name }}">Скачать
+                                            файл</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% if app.user == material.creatorUser %}
+                            <a class="mx-2" href="{{ path('app_material_edit', {'id': material.id}) }}"><i
+                                        class="fa-regular fa-pen-to-square"></i></a>
+                            {{ include('material/_delete_form.html.twig') }}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="w-3/4 flex justify-center items-center h-full text-2xl">
+                Выберите группу.
+            </div>
+        {% endif %}
+    </div>
+    <script>
+        const myDiv = document.getElementById("myDiv2");
+        myDiv.scrollTop = myDiv.scrollHeight - myDiv.clientHeight;
+    </script>
+{% endblock %}

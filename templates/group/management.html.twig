@@ -1,0 +1,145 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Управление группой{% endblock %}
+
+{% block body %}
+    <h1 class="ml-5 text-xl">Управление группой</h1>
+    <div class="flex flex-col w-96 m-5">
+        <div class="flex flex-col my-2">
+            {% for student in group.students %}
+                <a class="hover:underline" href="{{ path('app_user_show', {'id': student.user.id}) }}">{{ student.user.fullName }}
+                    (Студент)</a>
+            {% endfor %}
+            {% for teacher in group.teachers %}
+                <a class="hover:underline" href="{{ path('app_user_show', {'id': teacher.user.id}) }}">{{ teacher.user.fullName }}
+                    (Преподаватель)</a>
+            {% endfor %}
+        </div>
+        <label for="new-participant" class="btn w-2/3 my-2">Добавить участника</label>
+        <label for="edit-participant" class="btn w-2/3 my-2">Редактировать участника</label>
+        <label for="delete-participant" class="btn w-2/3 my-2">Удалить участника</label>
+    </div>
+    <input type="checkbox" id="new-participant" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="new-participant" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Добавить участника</h3>
+            <form method="post" action="{{ path('app_group_add_user') }}">
+                <input type="hidden" name="group_id" value="{{ group.id }}">
+                <select name="user"
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                        required>
+                    <option disabled selected>Выберите пользователя</option>
+                    {% for user in users %}
+                        {% set user_id = user.id %}
+                        {% set is_member = user_id in group.students|map(item => item.user.id)|merge(group.teachers|map(item => item.user.id))|merge([group.administrator.user.id]) %}
+                        {% if not is_member %}
+                            <option value={{ user.id }}>{{ user.fullName }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+                <select name="role"
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                        required>
+                    <option disabled selected>Выберите роль</option>
+                    <option value="teacher"
+                            {% if group.teachers.count >= group.requiredTeachers %}
+                                disabled
+                            {% endif %}
+                    >Преподаватель
+                    </option>
+                    <option value="student"
+                            {% if group.students.count >= group.requiredStudents %}
+                                disabled
+                            {% endif %}
+                    >Студент
+                    </option>
+                </select>
+                <button type="submit" class="btn btn-outline">Добавить</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="edit-participant" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="edit-participant"
+                   class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Редактировать участника</h3>
+            <form method="post" action="{{ path('app_group_edit_user') }}">
+                <input type="hidden" name="group_id" value="{{ group.id }}">
+                <select name="participant"
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                        required>
+                    <option disabled selected>Выберите пользователя</option>
+                    {% for student in group.students %}
+                        <option value={{ student.user.id }}>{{ student.user.fullName }}</option>
+                    {% endfor %}
+                    {% for teacher in group.teachers %}
+                        <option value={{ teacher.user.id }}>{{ teacher.user.fullName }}</option>
+                    {% endfor %}
+                </select>
+                <select name="role"
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                        required>
+                    <option disabled selected>Выберите роль</option>
+                    <option value="teacher" id="teacher-option"
+                            {% if group.teachers.count >= group.requiredTeachers %}
+                                disabled
+                            {% endif %}
+                    >Преподаватель
+                    </option>
+                    <option value="student" id="student-option"
+                            {% if group.students.count >= group.requiredStudents %}
+                                disabled
+                            {% endif %}
+                    >Студент
+                    </option>
+                </select>
+                <button type="submit" class="btn btn-outline">Редактировать</button>
+            </form>
+        </div>
+    </div>
+    <input type="checkbox" id="delete-participant" class="modal-toggle"/>
+    <div class="modal">
+        <div class="modal-box relative">
+            <label for="delete-participant"
+                   class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
+            <h3 class="text-lg font-bold">Удалить участника</h3>
+            <form method="post" action="{{ path('app_group_delete_user') }}">
+                <input type="hidden" name="group_id" value="{{ group.id }}">
+                <select name="user_to_delete"
+                        class="select select-bordered block w-full shadow-sm border-gray-300 rounded-md border p-2 mt-1 mb-2"
+                        required>
+                    <option disabled selected>Выберите пользователя</option>
+                    {% for student in group.students %}
+                        <option value={{ student.user.id }}>{{ student.user.fullName }}</option>
+                    {% endfor %}
+                    {% for teacher in group.teachers %}
+                        <option value={{ teacher.user.id }}>{{ teacher.user.fullName }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-outline">Удалить</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        const participantSelect = document.querySelector('select[name="participant"]');
+        const groupId = document.querySelector('input[name="group_id"]').value;
+        const teacherOption = document.querySelector('#teacher-option');
+        const studentOption = document.querySelector('#student-option');
+
+        participantSelect.addEventListener('change', (event) => {
+            const participantId = event.target.value;
+            fetch(`/group/${groupId}/users/${participantId}`)
+                .then((response) => response.json())
+                .then(data => {
+                    if (data.role === 'ROLE_TEACHER') {
+                        teacherOption.selected = true;
+                    } else if (data.role === 'ROLE_STUDENT') {
+                        studentOption.selected = true;
+                    }
+                })
+                .catch((error) => console.error(error));
+        });
+    </script>
+{% endblock %}

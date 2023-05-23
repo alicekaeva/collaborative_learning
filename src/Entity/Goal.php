@@ -27,6 +27,9 @@ class Goal
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $deadline = null;
 
+    #[ORM\Column]
+    private ?bool $completed = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -76,6 +79,18 @@ class Goal
     public function setDeadline(?\DateTimeImmutable $deadline): self
     {
         $this->deadline = $deadline;
+
+        return $this;
+    }
+
+    public function isCompleted(): ?bool
+    {
+        return $this->completed;
+    }
+
+    public function setCompleted(bool $completed): self
+    {
+        $this->completed = $completed;
 
         return $this;
     }

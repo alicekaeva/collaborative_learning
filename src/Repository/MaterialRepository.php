@@ -2,7 +2,9 @@
 
 namespace App\Repository;
 
+use App\Entity\Category;
 use App\Entity\Material;
+use App\Entity\Tag;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -39,28 +41,40 @@ class MaterialRepository extends ServiceEntityRepository
         }
     }
 
-//    /**
-//     * @return Material[] Returns an array of Material objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('m.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    public function findRecommendedMaterials(array $tags): array
+    {
+        return $this->createQueryBuilder('m')
+            ->join('m.creatorGroup', 'g')
+            ->join('g.tags', 't')
+            ->where('m.isPrivate = false')
+            ->andWhere('t IN (:tags)')
+            ->setParameter('tags', $tags)
+            ->getQuery()
+            ->getResult();
+    }
 
-//    public function findOneBySomeField($value): ?Material
-//    {
-//        return $this->createQueryBuilder('m')
-//            ->andWhere('m.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    public function findMaterialsByTag(Tag $tag): array
+    {
+        return $this->createQueryBuilder('m')
+            ->join('m.creatorGroup', 'g')
+            ->join('g.tags', 't')
+            ->where('m.isPrivate = false')
+            ->andWhere(':tag MEMBER OF g.tags')
+            ->setParameter('tag', $tag)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findMaterialsByCategory(Category $category): array
+    {
+        return $this->createQueryBuilder('m')
+            ->join('m.creatorGroup', 'g')
+            ->join('g.tags', 't')
+            ->join('t.category', 'c')
+            ->where('m.isPrivate = false')
+            ->andWhere('c.id = :category_id')
+            ->setParameter('category_id', $category->getId())
+            ->getQuery()
+            ->getResult();
+    }
 }
