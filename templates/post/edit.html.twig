@@ -44,7 +44,7 @@
             <h3 class="text-lg font-bold">Добавить тег</h3>
             <form method="post" action="{{ path('app_tag_new') }}">
                 <input type="hidden" name="category" value="{{ post.tags[0].category.id }}">
-                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <input type="text" required name="new_tag" class="input input-bordered max-w-xs mt-2"/>
                 <button type="submit" class="btn btn-outline">Добавить</button>
             </form>
         </div>
