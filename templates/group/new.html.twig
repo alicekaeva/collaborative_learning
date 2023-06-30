@@ -62,7 +62,7 @@
             <label for="new-category" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Добавить категорию</h3>
             <form method="post" action="{{ path('app_category_new') }}">
-                <input type="text" name="new_category" class="input input-bordered max-w-xs"/>
+                <input type="text" required name="new_category" class="input input-bordered max-w-xs"/>
                 <button type="submit" class="btn btn-outline">Добавить</button>
             </form>
         </div>
@@ -73,13 +73,13 @@
             <label for="new-tag" class="btn btn-sm btn-circle absolute right-2 top-2">✕</label>
             <h3 class="text-lg font-bold">Добавить тег</h3>
             <form method="post" action="{{ path('app_tag_new') }}">
-                <select name='category' class="select select-bordered w-full mt-2 max-w-xs">
+                <select name='category' required class="select select-bordered w-full mt-2 max-w-xs">
                     <option disabled selected>Выберите категорию</option>
                     {% for category in categories %}
                         <option value={{ category.id }}>{{ category.name }}</option>
                     {% endfor %}
                 </select>
-                <input type="text" name="new_tag" class="input input-bordered max-w-xs mt-2"/>
+                <input type="text" required name="new_tag" class="input input-bordered max-w-xs mt-2"/>
                 <button type="submit" class="btn btn-outline">Добавить</button>
             </form>
         </div>

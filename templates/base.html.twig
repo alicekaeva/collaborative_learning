@@ -45,9 +45,6 @@
                 </ul>
             </div>
         </div>
-        <div class="navbar-center">
-            <a class="btn btn-ghost normal-case text-xl">{% block name %}{% endblock %}</a>
-        </div>
         <div class="navbar-end">
             {% block button %}{% endblock %}
             {% if is_granted('IS_AUTHENTICATED_FULLY') %}
