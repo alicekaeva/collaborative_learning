@@ -7,12 +7,12 @@ services:
     restart: always
     build:
       context: .
-      target: stateless
-      args:
-        APP_ENV: prod
+      target: stateful
     environment:
-      APP_ENV: prod
       DATABASE_URL: "mysql://user:password@mysql:3306/collaborative_learning?serverVersion=8.0.31&charset=utf8mb4"
+    volumes:
+      - ./nginx-unit/:/docker-entrypoint.d/
+      - ./:/app
     ports:
       - "127.0.0.1:9999:8080"
 
