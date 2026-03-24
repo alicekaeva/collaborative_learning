@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Категории — Администрирование{% endblock %}
+
+{% block body %}
+<div class="max-w-3xl mx-auto flex flex-col gap-5">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-folder text-primary mr-2"></i>Категории
+      </h1>
+      <p class="text-base-content/60 text-sm mt-1">Управление категориями тегов</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/tags" class="btn btn-ghost btn-sm gap-1">
+        <i class="fa-solid fa-tags"></i> Теги
+      </a>
+      <a href="/categories/new" class="btn btn-primary btn-sm gap-1">
+        <i class="fa-solid fa-plus"></i> Создать категорию
+      </a>
+    </div>
+  </div>
+
+  <!-- Categories table -->
+  <div class="card bg-base-100 shadow-lg overflow-hidden">
+    {% if categories %}
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead>
+          <tr>
+            <th class="w-12 text-base-content/50">#</th>
+            <th>Название</th>
+            <th class="w-32 text-right">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for category in categories %}
+          <tr>
+            <td class="text-base-content/40 text-sm">{{ category.id }}</td>
+            <td>
+              <div class="flex items-center gap-2">
+                <i class="fa-solid fa-folder text-primary"></i>
+                <span class="font-medium">{{ category.name }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="flex gap-1 justify-end">
+                <a href="/categories/{{ category.id }}/edit" class="btn btn-ghost btn-xs btn-circle text-info" title="Редактировать">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+                <form action="/categories/{{ category.id }}/delete" method="POST"
+                      onsubmit="return confirm('Удалить категорию «{{ category.name }}»? Теги в этой категории останутся без категории.')">
+                  <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card-body items-center text-center py-16">
+      <i class="fa-solid fa-folder-open text-5xl text-base-content/20 mb-4"></i>
+      <h3 class="text-lg font-semibold text-base-content/60">Категорий нет</h3>
+      <p class="text-base-content/40 text-sm">Создайте первую категорию для организации тегов.</p>
+      <a href="/categories/new" class="btn btn-primary btn-sm mt-4">
+        <i class="fa-solid fa-plus mr-1"></i> Создать категорию
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if categories %}
+  <p class="text-sm text-base-content/50 text-right">Всего категорий: {{ categories | length }}</p>
+  {% endif %}
+
+</div>
+{% endblock %}

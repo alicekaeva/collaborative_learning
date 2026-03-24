@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать тег — Администрирование{% endblock %}
+
+{% block body %}
+<div class="max-w-md mx-auto">
+  <div class="mb-6 flex items-center gap-3">
+    <a href="/tags" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-pen-to-square text-primary mr-2"></i>Редактировать тег
+      </h1>
+      <p class="text-base-content/60 text-sm">{{ tag.name }}</p>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error mb-4">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span>{{ error }}</span>
+  </div>
+  {% endif %}
+
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body p-6">
+      <form action="/tags/{{ tag.id }}/edit" method="POST" class="space-y-5">
+
+        <!-- Name -->
+        <div class="form-control">
+          <label class="label" for="name">
+            <span class="label-text font-medium">Название тега <span class="text-error">*</span></span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="input input-bordered w-full"
+            value="{{ tag.name }}"
+            required
+            maxlength="100"
+          />
+        </div>
+
+        <!-- Category -->
+        <div class="form-control">
+          <label class="label" for="category_id">
+            <span class="label-text font-medium">Категория</span>
+          </label>
+          <select id="category_id" name="category_id" class="select select-bordered w-full">
+            <option value="">— Без категории —</option>
+            {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if tag.category_id == cat.id %}selected{% endif %}>
+              {{ cat.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Submit -->
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="btn btn-primary flex-1">
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Сохранить
+          </button>
+          <a href="/tags" class="btn btn-ghost">Отмена</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Danger zone -->
+  <div class="card bg-base-100 shadow-lg mt-4 border border-error/30">
+    <div class="card-body p-4">
+      <h3 class="font-semibold text-error text-sm">Опасная зона</h3>
+      <div class="flex items-center justify-between">
+        <p class="text-sm text-base-content/60">Удалить тег «{{ tag.name }}»</p>
+        <form action="/tags/{{ tag.id }}/delete" method="POST"
+              onsubmit="return confirm('Удалить тег «{{ tag.name }}»?')">
+          <button type="submit" class="btn btn-error btn-sm btn-outline">
+            <i class="fa-solid fa-trash mr-1"></i> Удалить
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

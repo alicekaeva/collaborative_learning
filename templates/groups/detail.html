@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }} — Совместное обучение{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
+
+  <!-- Back button -->
+  <div class="flex items-center gap-3">
+    <a href="/groups" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <span class="text-sm text-base-content/60 breadcrumbs">
+      <a href="/groups" class="hover:text-primary">Группы</a>
+      <span class="mx-2 text-base-content/30">/</span>
+      {{ group.name }}
+    </span>
+  </div>
+
+  <!-- Group header card -->
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body p-6">
+      <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-users text-xl text-primary"></i>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-base-content">{{ group.name }}</h1>
+              {% if user_role %}
+              <span class="badge badge-primary badge-sm mt-1">
+                {% if user_role == 'admin' %}Администратор
+                {% elif user_role == 'teacher' %}Преподаватель
+                {% elif user_role == 'student' %}Студент
+                {% endif %}
+              </span>
+              {% endif %}
+            </div>
+          </div>
+
+          {% if group.info %}
+          <p class="text-base-content/70 leading-relaxed mt-3">{{ group.info }}</p>
+          {% endif %}
+
+          <!-- Tags -->
+          {% if group.tags %}
+          <div class="flex flex-wrap gap-1 mt-3">
+            {% for tag in group.tags %}
+            <a href="/groups?tag_id={{ tag.id }}" class="badge badge-outline badge-sm hover:badge-primary transition-colors">
+              {{ tag.name }}
+            </a>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- Action buttons -->
+        <div class="flex flex-col gap-2 flex-shrink-0">
+          {% if user_role == 'admin' or (user and user.admin_profile and group.administrator_id == user.admin_profile.id) %}
+            <a href="/groups/{{ group.id }}/management" class="btn btn-outline btn-sm gap-1">
+              <i class="fa-solid fa-gear"></i> Управление
+            </a>
+            <a href="/groups/{{ group.id }}/edit" class="btn btn-outline btn-sm gap-1">
+              <i class="fa-solid fa-pen-to-square"></i> Редактировать
+            </a>
+          {% endif %}
+          {% if user and not user_role %}
+            <form action="/groups/{{ group.id }}/enroll" method="POST">
+              <button type="submit" class="btn btn-primary btn-sm w-full gap-1">
+                <i class="fa-solid fa-right-to-bracket"></i> Записаться
+              </button>
+            </form>
+          {% endif %}
+          {% if user_role %}
+            <a href="/learning/groups/{{ group.id }}" class="btn btn-primary btn-sm gap-1">
+              <i class="fa-solid fa-graduation-cap"></i> Рабочее пространство
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div class="stat bg-base-100 shadow rounded-xl p-4 text-center">
+      <div class="stat-figure text-info">
+        <i class="fa-solid fa-chalkboard-user text-2xl"></i>
+      </div>
+      <div class="stat-value text-2xl text-info">{{ group.teachers | length }}</div>
+      <div class="stat-title text-xs">из {{ group.required_teachers }}</div>
+      <div class="stat-desc">Преподавателей</div>
+    </div>
+    <div class="stat bg-base-100 shadow rounded-xl p-4 text-center">
+      <div class="stat-figure text-success">
+        <i class="fa-solid fa-user-graduate text-2xl"></i>
+      </div>
+      <div class="stat-value text-2xl text-success">{{ group.students | length }}</div>
+      <div class="stat-title text-xs">из {{ group.required_students }}</div>
+      <div class="stat-desc">Студентов</div>
+    </div>
+    <div class="stat bg-base-100 shadow rounded-xl p-4 text-center">
+      <div class="stat-figure text-warning">
+        <i class="fa-solid fa-tags text-2xl"></i>
+      </div>
+      <div class="stat-value text-2xl text-warning">{{ group.tags | length }}</div>
+      <div class="stat-desc">Тегов</div>
+    </div>
+    <div class="stat bg-base-100 shadow rounded-xl p-4 text-center">
+      <div class="stat-figure text-primary">
+        <i class="fa-solid fa-id-badge text-2xl"></i>
+      </div>
+      <div class="stat-value text-2xl text-primary">{{ group.id }}</div>
+      <div class="stat-desc">ID группы</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Teachers list -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body p-5">
+        <h2 class="card-title text-base font-semibold">
+          <i class="fa-solid fa-chalkboard-user text-info mr-2"></i>
+          Преподаватели
+          <span class="badge badge-info badge-sm ml-1">{{ group.teachers | length }}</span>
+        </h2>
+        {% if group.teachers %}
+        <ul class="space-y-2 mt-2">
+          {% for teacher in group.teachers %}
+          <li class="flex items-center gap-3">
+            <div class="avatar placeholder">
+              <div class="bg-info/20 text-info rounded-full w-8 flex items-center justify-center">
+                <span class="text-xs font-bold">
+                  {% if teacher.user %}{{ teacher.user.full_name[0] | upper }}{% else %}?{% endif %}
+                </span>
+              </div>
+            </div>
+            {% if teacher.user %}
+            <a href="/users/{{ teacher.user.id }}" class="text-sm font-medium hover:text-primary transition-colors">
+              {{ teacher.user.full_name }}
+            </a>
+            {% else %}
+            <span class="text-sm text-base-content/50">Неизвестный</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-base-content/50 mt-2">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Преподаватели не назначены
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Students list -->
+    <div class="card bg-base-100 shadow">
+      <div class="card-body p-5">
+        <h2 class="card-title text-base font-semibold">
+          <i class="fa-solid fa-user-graduate text-success mr-2"></i>
+          Студенты
+          <span class="badge badge-success badge-sm ml-1">{{ group.students | length }}</span>
+        </h2>
+        {% if group.students %}
+        <ul class="space-y-2 mt-2">
+          {% for student in group.students %}
+          <li class="flex items-center gap-3">
+            <div class="avatar placeholder">
+              <div class="bg-success/20 text-success rounded-full w-8 flex items-center justify-center">
+                <span class="text-xs font-bold">
+                  {% if student.user %}{{ student.user.full_name[0] | upper }}{% else %}?{% endif %}
+                </span>
+              </div>
+            </div>
+            {% if student.user %}
+            <a href="/users/{{ student.user.id }}" class="text-sm font-medium hover:text-primary transition-colors">
+              {{ student.user.full_name }}
+            </a>
+            {% else %}
+            <span class="text-sm text-base-content/50">Неизвестный</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-base-content/50 mt-2">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Студенты не записаны
+        </p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Administrator info -->
+  {% if group.administrator %}
+  <div class="card bg-base-100 shadow">
+    <div class="card-body p-4 flex-row items-center gap-3">
+      <i class="fa-solid fa-crown text-warning text-xl flex-shrink-0"></i>
+      <div>
+        <p class="text-xs text-base-content/50 font-medium uppercase tracking-wider">Администратор</p>
+        {% if group.administrator.user %}
+        <a href="/users/{{ group.administrator.user.id }}" class="font-semibold hover:text-primary transition-colors">
+          {{ group.administrator.user.full_name }}
+        </a>
+        {% else %}
+        <span class="font-semibold">Неизвестный</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

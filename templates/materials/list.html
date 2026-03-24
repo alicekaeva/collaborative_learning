@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Материалы — Совместное обучение{% endblock %}
+
+{% block body %}
+<div class="flex flex-col gap-4">
+
+  <!-- Page header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-file-lines text-primary mr-2"></i>Материалы
+      </h1>
+      <p class="text-base-content/60 text-sm mt-1">Учебные материалы платформы</p>
+    </div>
+    {% if user %}
+    <a href="/materials/new" class="btn btn-primary gap-2 self-start sm:self-auto">
+      <i class="fa-solid fa-upload"></i> Загрузить материал
+    </a>
+    {% endif %}
+  </div>
+
+  {% if materials %}
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {% for material in materials %}
+      <div class="card bg-base-100 shadow hover:shadow-md transition-shadow">
+        <div class="card-body p-5">
+          <!-- File type badge + privacy -->
+          <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center gap-2">
+              {% if 'image' in material.mime_type %}
+                <i class="fa-solid fa-image text-success text-lg"></i>
+                <span class="badge badge-success badge-sm">Изображение</span>
+              {% elif 'pdf' in material.mime_type %}
+                <i class="fa-solid fa-file-pdf text-error text-lg"></i>
+                <span class="badge badge-error badge-sm">PDF</span>
+              {% elif 'video' in material.mime_type %}
+                <i class="fa-solid fa-file-video text-info text-lg"></i>
+                <span class="badge badge-info badge-sm">Видео</span>
+              {% elif 'audio' in material.mime_type %}
+                <i class="fa-solid fa-file-audio text-warning text-lg"></i>
+                <span class="badge badge-warning badge-sm">Аудио</span>
+              {% elif 'zip' in material.mime_type or 'archive' in material.mime_type %}
+                <i class="fa-solid fa-file-zipper text-secondary text-lg"></i>
+                <span class="badge badge-secondary badge-sm">Архив</span>
+              {% elif 'text' in material.mime_type or 'document' in material.mime_type %}
+                <i class="fa-solid fa-file-word text-primary text-lg"></i>
+                <span class="badge badge-primary badge-sm">Документ</span>
+              {% else %}
+                <i class="fa-solid fa-file text-base-content/60 text-lg"></i>
+                <span class="badge badge-ghost badge-sm">Файл</span>
+              {% endif %}
+            </div>
+            {% if material.is_private %}
+            <span class="badge badge-warning badge-sm gap-1">
+              <i class="fa-solid fa-lock fa-xs"></i> Приватный
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Name -->
+          <h3 class="font-semibold text-base-content line-clamp-1">{{ material.name }}</h3>
+
+          <!-- Uploader -->
+          {% if material.creator_user %}
+          <p class="text-xs text-base-content/50 flex items-center gap-1 mt-1">
+            <i class="fa-solid fa-user"></i>
+            <a href="/users/{{ material.creator_user.id }}" class="hover:text-primary transition-colors">
+              {{ material.creator_user.full_name }}
+            </a>
+          </p>
+          {% endif %}
+
+          <!-- Group label -->
+          {% if material.creator_group %}
+          <p class="text-xs text-base-content/50 flex items-center gap-1">
+            <i class="fa-solid fa-users"></i>
+            {{ material.creator_group.name }}
+          </p>
+          {% endif %}
+
+          <!-- Actions -->
+          <div class="card-actions justify-between items-center mt-3">
+            <a href="{{ material.file_link }}" target="_blank" download class="btn btn-primary btn-sm gap-1">
+              <i class="fa-solid fa-download"></i> Скачать
+            </a>
+            <div class="flex gap-1">
+              {% if user and (material.creator_user_id == user.id or 'ROLE_ADMIN' in user.roles) %}
+              <a href="/materials/{{ material.id }}/edit" class="btn btn-ghost btn-xs btn-circle text-info" title="Редактировать">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </a>
+              <form action="/materials/{{ material.id }}/delete" method="POST"
+                    onsubmit="return confirm('Удалить материал? Это действие необратимо.')">
+                <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card bg-base-100 shadow">
+      <div class="card-body items-center text-center py-16">
+        <i class="fa-solid fa-folder-open text-5xl text-base-content/20 mb-4"></i>
+        <h3 class="text-lg font-semibold text-base-content/60">Материалов нет</h3>
+        <p class="text-base-content/40 text-sm">Пока никто не загрузил ни одного материала.</p>
+        {% if user %}
+        <a href="/materials/new" class="btn btn-primary btn-sm mt-4">
+          <i class="fa-solid fa-upload mr-1"></i> Загрузить первый
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

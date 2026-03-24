@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Создать группу — Совместное обучение{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6 flex items-center gap-3">
+    <a href="/groups" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-plus text-primary mr-2"></i>Создать группу
+      </h1>
+      <p class="text-base-content/60 text-sm">Заполните информацию о новой учебной группе</p>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error mb-4">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span>{{ error }}</span>
+  </div>
+  {% endif %}
+
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body p-6">
+      <form action="/groups/new" method="POST" class="space-y-5">
+
+        <!-- Name -->
+        <div class="form-control">
+          <label class="label" for="name">
+            <span class="label-text font-medium">Название группы <span class="text-error">*</span></span>
+          </label>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            class="input input-bordered w-full"
+            placeholder="Например: Группа по Python"
+            required
+            maxlength="255"
+          />
+        </div>
+
+        <!-- Info -->
+        <div class="form-control">
+          <label class="label" for="info">
+            <span class="label-text font-medium">Описание</span>
+            <span class="label-text-alt text-base-content/50">Необязательно</span>
+          </label>
+          <textarea
+            id="info"
+            name="info"
+            class="textarea textarea-bordered w-full min-h-24 resize-y"
+            placeholder="Краткое описание группы, цели, темы..."
+          ></textarea>
+        </div>
+
+        <!-- Required counts -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label" for="required_teachers">
+              <span class="label-text font-medium">Преподавателей (необходимо)</span>
+            </label>
+            <input
+              type="number"
+              id="required_teachers"
+              name="required_teachers"
+              class="input input-bordered w-full"
+              value="1"
+              min="0"
+              max="100"
+            />
+          </div>
+          <div class="form-control">
+            <label class="label" for="required_students">
+              <span class="label-text font-medium">Студентов (необходимо)</span>
+            </label>
+            <input
+              type="number"
+              id="required_students"
+              name="required_students"
+              class="input input-bordered w-full"
+              value="1"
+              min="0"
+              max="1000"
+            />
+          </div>
+        </div>
+
+        <!-- Tags -->
+        {% if tags %}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Теги</span>
+            <span class="label-text-alt text-base-content/50">Выберите подходящие теги</span>
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 border border-base-300 rounded-lg bg-base-200/50">
+            {% for tag in tags %}
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-base-200 rounded p-1 transition-colors">
+              <input type="checkbox" name="tag_ids" value="{{ tag.id }}" class="checkbox checkbox-primary checkbox-sm"/>
+              <span class="text-sm">{{ tag.name }}</span>
+              {% if tag.category %}
+              <span class="badge badge-ghost badge-xs ml-auto">{{ tag.category.name }}</span>
+              {% endif %}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Submit -->
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="btn btn-primary flex-1">
+            <i class="fa-solid fa-plus mr-2"></i> Создать группу
+          </button>
+          <a href="/groups" class="btn btn-ghost">Отмена</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

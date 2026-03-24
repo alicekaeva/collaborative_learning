@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Диалог с {{ partner.full_name }} — Совместное обучение{% endblock %}
+
+{% block extra_head %}
+<style>
+  #chat-area { scroll-behavior: smooth; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto flex flex-col gap-0 h-[calc(100vh-10rem)]">
+
+  <!-- Chat header -->
+  <div class="card bg-base-100 shadow rounded-b-none border-b border-base-200">
+    <div class="card-body py-3 px-4 flex-row items-center gap-3">
+      <a href="/messages" class="btn btn-ghost btn-sm btn-circle flex-shrink-0">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <div class="avatar placeholder flex-shrink-0">
+        <div class="bg-primary/20 text-primary rounded-full w-10 flex items-center justify-center">
+          <span class="text-sm font-bold">{{ partner.full_name[0] | upper }}</span>
+        </div>
+      </div>
+      <div class="flex-1 min-w-0">
+        <a href="/users/{{ partner.id }}" class="font-semibold hover:text-primary transition-colors">
+          {{ partner.full_name }}
+        </a>
+        <p class="text-xs text-base-content/50">{{ partner.email }}</p>
+      </div>
+      <a href="/users/{{ partner.id }}" class="btn btn-ghost btn-xs btn-circle" title="Профиль">
+        <i class="fa-solid fa-user"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Pinned messages section -->
+  {% set pinned = messages | selectattr('is_pinned') | list %}
+  {% if pinned %}
+  <div class="bg-warning/10 border-b border-warning/30 px-4 py-2">
+    <p class="text-xs text-warning font-semibold mb-1 flex items-center gap-1">
+      <i class="fa-solid fa-thumbtack"></i> Закреплённые сообщения
+    </p>
+    {% for msg in pinned %}
+    <div class="flex items-start justify-between gap-2 py-1">
+      <p class="text-xs text-base-content/70 line-clamp-1">
+        <span class="font-medium">{{ msg.sender.full_name if msg.sender else 'Неизвестный' }}:</span>
+        {{ msg.content }}
+      </p>
+      <form action="/messages/{{ msg.id }}/unpin" method="POST">
+        <button type="submit" class="btn btn-ghost btn-xs text-warning" title="Открепить">
+          <i class="fa-solid fa-thumbtack-slash fa-xs"></i>
+        </button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Messages area -->
+  <div id="chat-area" class="flex-1 overflow-y-auto bg-base-100 px-4 py-4 flex flex-col gap-2">
+    {% if messages %}
+      {% for msg in messages %}
+        {% set is_mine = msg.sender_id == user.id %}
+        <div class="chat {% if is_mine %}chat-end{% else %}chat-start{% endif %}">
+          <div class="chat-image avatar placeholder">
+            <div class="bg-{% if is_mine %}primary{% else %}neutral{% endif %}/20 text-{% if is_mine %}primary{% else %}neutral-content{% endif %} rounded-full w-8 flex items-center justify-center">
+              <span class="text-xs font-bold">
+                {% if msg.sender %}{{ msg.sender.full_name[0] | upper }}{% else %}?{% endif %}
+              </span>
+            </div>
+          </div>
+          <div class="chat-header text-xs text-base-content/50 mb-0.5">
+            {% if not is_mine %}{{ msg.sender.full_name if msg.sender else 'Неизвестный' }}{% endif %}
+            {% if msg.sending_date %}
+            <time class="ml-1">{{ msg.sending_date.strftime('%d.%m %H:%M') }}</time>
+            {% endif %}
+            {% if msg.is_pinned %}
+            <i class="fa-solid fa-thumbtack text-warning ml-1 text-xs" title="Закреплено"></i>
+            {% endif %}
+          </div>
+          <div class="chat-bubble {% if is_mine %}chat-bubble-primary{% else %}chat-bubble-base-300{% endif %} max-w-xs sm:max-w-sm">
+            {{ msg.content }}
+          </div>
+          <div class="chat-footer opacity-0 group-hover:opacity-100 flex gap-1 mt-0.5">
+            {% if is_mine or ('ROLE_ADMIN' in user.roles) %}
+            <form action="/messages/{{ msg.id }}/{% if msg.is_pinned %}unpin{% else %}pin{% endif %}" method="POST">
+              <button type="submit" class="btn btn-ghost btn-xs text-base-content/40 hover:text-warning" title="{% if msg.is_pinned %}Открепить{% else %}Закрепить{% endif %}">
+                <i class="fa-solid fa-thumbtack fa-xs"></i>
+              </button>
+            </form>
+            <form action="/messages/{{ msg.id }}/delete" method="POST"
+                  onsubmit="return confirm('Удалить сообщение?')">
+              <button type="submit" class="btn btn-ghost btn-xs text-base-content/40 hover:text-error" title="Удалить">
+                <i class="fa-solid fa-trash fa-xs"></i>
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="flex-1 flex items-center justify-center">
+        <div class="text-center">
+          <i class="fa-regular fa-comments text-5xl text-base-content/20 mb-3"></i>
+          <p class="text-base-content/40 text-sm">Начните переписку</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Message input form -->
+  <div class="card bg-base-100 shadow rounded-t-none border-t border-base-200">
+    <div class="card-body py-3 px-4">
+      <form action="/messages/send" method="POST" class="flex gap-2 items-end">
+        <input type="hidden" name="receiver_id" value="{{ partner.id }}"/>
+        <div class="form-control flex-1">
+          <textarea
+            name="content"
+            class="textarea textarea-bordered resize-none min-h-10 max-h-32 leading-relaxed text-sm"
+            placeholder="Напишите сообщение..."
+            required
+            rows="1"
+            id="msg-input"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.submit();}"
+          ></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm h-10 px-4 flex-shrink-0">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+      <p class="text-xs text-base-content/40 mt-1">Enter — отправить, Shift+Enter — перенос строки</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Scroll to bottom on load
+  var chatArea = document.getElementById('chat-area');
+  if (chatArea) chatArea.scrollTop = chatArea.scrollHeight;
+
+  // Auto-resize textarea
+  var msgInput = document.getElementById('msg-input');
+  if (msgInput) {
+    msgInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 128) + 'px';
+    });
+  }
+
+  // Show action buttons on hover
+  document.querySelectorAll('.chat').forEach(function(el) {
+    el.classList.add('group');
+  });
+</script>
+{% endblock %}

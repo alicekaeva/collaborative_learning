@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Управление группой — {{ group.name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto flex flex-col gap-6">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <a href="/groups/{{ group.id }}" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-gear text-primary mr-2"></i>Управление группой
+      </h1>
+      <p class="text-base-content/60 text-sm">{{ group.name }}</p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <!-- Teachers section -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body p-5">
+        <h2 class="card-title font-semibold text-base">
+          <i class="fa-solid fa-chalkboard-user text-info mr-2"></i>
+          Преподаватели
+          <span class="badge badge-info badge-sm">{{ group.teachers | length }} / {{ group.required_teachers }}</span>
+        </h2>
+
+        {% if group.teachers %}
+        <ul class="space-y-2 mt-2 divide-y divide-base-200">
+          {% for teacher in group.teachers %}
+          <li class="flex items-center justify-between py-2 first:pt-0 last:pb-0">
+            <div class="flex items-center gap-2">
+              <div class="avatar placeholder">
+                <div class="bg-info/20 text-info rounded-full w-8 flex items-center justify-center">
+                  <span class="text-xs font-bold">
+                    {% if teacher.user %}{{ teacher.user.full_name[0] | upper }}{% else %}?{% endif %}
+                  </span>
+                </div>
+              </div>
+              <div>
+                {% if teacher.user %}
+                <a href="/users/{{ teacher.user.id }}" class="text-sm font-medium hover:text-primary transition-colors">
+                  {{ teacher.user.full_name }}
+                </a>
+                <p class="text-xs text-base-content/50">{{ teacher.user.email }}</p>
+                {% else %}
+                <span class="text-sm text-base-content/50">Неизвестный</span>
+                {% endif %}
+              </div>
+            </div>
+            {% if teacher.user %}
+            <form action="/groups/{{ group.id }}/remove-user" method="POST">
+              <input type="hidden" name="user_id" value="{{ teacher.user.id }}"/>
+              <input type="hidden" name="role" value="teacher"/>
+              <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить из группы"
+                      onclick="return confirm('Удалить этого преподавателя из группы?')">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </form>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-base-content/50 mt-2">Нет преподавателей</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Students section -->
+    <div class="card bg-base-100 shadow-lg">
+      <div class="card-body p-5">
+        <h2 class="card-title font-semibold text-base">
+          <i class="fa-solid fa-user-graduate text-success mr-2"></i>
+          Студенты
+          <span class="badge badge-success badge-sm">{{ group.students | length }} / {{ group.required_students }}</span>
+        </h2>
+
+        {% if group.students %}
+        <ul class="space-y-2 mt-2 divide-y divide-base-200">
+          {% for student in group.students %}
+          <li class="flex items-center justify-between py-2 first:pt-0 last:pb-0">
+            <div class="flex items-center gap-2">
+              <div class="avatar placeholder">
+                <div class="bg-success/20 text-success rounded-full w-8 flex items-center justify-center">
+                  <span class="text-xs font-bold">
+                    {% if student.user %}{{ student.user.full_name[0] | upper }}{% else %}?{% endif %}
+                  </span>
+                </div>
+              </div>
+              <div>
+                {% if student.user %}
+                <a href="/users/{{ student.user.id }}" class="text-sm font-medium hover:text-primary transition-colors">
+                  {{ student.user.full_name }}
+                </a>
+                <p class="text-xs text-base-content/50">{{ student.user.email }}</p>
+                {% else %}
+                <span class="text-sm text-base-content/50">Неизвестный</span>
+                {% endif %}
+              </div>
+            </div>
+            {% if student.user %}
+            <form action="/groups/{{ group.id }}/remove-user" method="POST">
+              <input type="hidden" name="user_id" value="{{ student.user.id }}"/>
+              <input type="hidden" name="role" value="student"/>
+              <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить из группы"
+                      onclick="return confirm('Удалить этого студента из группы?')">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </form>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-base-content/50 mt-2">Нет студентов</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Add user form -->
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body p-5">
+      <h2 class="card-title font-semibold text-base mb-1">
+        <i class="fa-solid fa-user-plus text-primary mr-2"></i>
+        Добавить участника
+      </h2>
+      <p class="text-sm text-base-content/60 mb-4">
+        Введите ID пользователя и выберите роль. Убедитесь, что у пользователя есть соответствующий профиль.
+      </p>
+      <form action="/groups/{{ group.id }}/add-user" method="POST" class="flex flex-col sm:flex-row gap-3">
+        <div class="form-control flex-1">
+          <label class="label py-1" for="user_id">
+            <span class="label-text text-sm font-medium">ID пользователя</span>
+          </label>
+          <input
+            type="number"
+            id="user_id"
+            name="user_id"
+            class="input input-bordered input-sm w-full"
+            placeholder="Например: 42"
+            required
+            min="1"
+          />
+        </div>
+        <div class="form-control flex-1">
+          <label class="label py-1" for="role">
+            <span class="label-text text-sm font-medium">Роль</span>
+          </label>
+          <select id="role" name="role" class="select select-bordered select-sm w-full" required>
+            <option value="" disabled selected>Выберите роль</option>
+            <option value="teacher">Преподаватель</option>
+            <option value="student">Студент</option>
+          </select>
+        </div>
+        <div class="form-control justify-end">
+          <button type="submit" class="btn btn-primary btn-sm mt-auto">
+            <i class="fa-solid fa-plus mr-1"></i> Добавить
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick links -->
+  <div class="flex gap-3 flex-wrap">
+    <a href="/groups/{{ group.id }}" class="btn btn-ghost btn-sm gap-1">
+      <i class="fa-solid fa-eye"></i> Просмотр группы
+    </a>
+    <a href="/groups/{{ group.id }}/edit" class="btn btn-ghost btn-sm gap-1">
+      <i class="fa-solid fa-pen-to-square"></i> Редактировать
+    </a>
+    <a href="/learning/groups/{{ group.id }}" class="btn btn-ghost btn-sm gap-1">
+      <i class="fa-solid fa-graduation-cap"></i> Рабочее пространство
+    </a>
+  </div>
+
+</div>
+{% endblock %}

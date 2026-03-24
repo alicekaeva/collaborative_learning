@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать профиль — {{ profile_user.full_name }}{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6 flex items-center gap-3">
+    <a href="/users/{{ profile_user.id }}" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-pen-to-square text-primary mr-2"></i>Редактировать профиль
+      </h1>
+      <p class="text-base-content/60 text-sm">{{ profile_user.full_name }}</p>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error mb-4">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span>{{ error }}</span>
+  </div>
+  {% endif %}
+
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body p-6">
+      <form action="/users/{{ profile_user.id }}/edit" method="POST" class="space-y-5">
+
+        <!-- Full name -->
+        <div class="form-control">
+          <label class="label" for="full_name">
+            <span class="label-text font-medium">Полное имя</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-user text-base-content/40"></i>
+            <input
+              type="text"
+              id="full_name"
+              name="full_name"
+              class="grow"
+              value="{{ profile_user.full_name }}"
+              placeholder="Иванов Иван Иванович"
+              maxlength="255"
+            />
+          </label>
+        </div>
+
+        <!-- Email -->
+        <div class="form-control">
+          <label class="label" for="email">
+            <span class="label-text font-medium">Email</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-envelope text-base-content/40"></i>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="grow"
+              value="{{ profile_user.email }}"
+              placeholder="your@email.com"
+            />
+          </label>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-control">
+          <label class="label" for="phone_number">
+            <span class="label-text font-medium">Телефон</span>
+            <span class="label-text-alt text-base-content/50">Необязательно</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-phone text-base-content/40"></i>
+            <input
+              type="tel"
+              id="phone_number"
+              name="phone_number"
+              class="grow"
+              value="{{ profile_user.phone_number or '' }}"
+              placeholder="+7 (999) 123-45-67"
+              maxlength="20"
+            />
+          </label>
+        </div>
+
+        <!-- Age -->
+        <div class="form-control">
+          <label class="label" for="age">
+            <span class="label-text font-medium">Возраст</span>
+            <span class="label-text-alt text-base-content/50">Необязательно</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-cake-candles text-base-content/40"></i>
+            <input
+              type="number"
+              id="age"
+              name="age"
+              class="grow"
+              value="{{ profile_user.age or '' }}"
+              placeholder="Ваш возраст"
+              min="1"
+              max="120"
+            />
+          </label>
+        </div>
+
+        <!-- Alma mater -->
+        <div class="form-control">
+          <label class="label" for="alma_mater">
+            <span class="label-text font-medium">Учебное заведение</span>
+            <span class="label-text-alt text-base-content/50">Необязательно</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-building-columns text-base-content/40"></i>
+            <input
+              type="text"
+              id="alma_mater"
+              name="alma_mater"
+              class="grow"
+              value="{{ profile_user.alma_mater or '' }}"
+              placeholder="МГУ, МФТИ, ..."
+              maxlength="255"
+            />
+          </label>
+        </div>
+
+        <!-- Tags -->
+        {% if tags is defined and tags %}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Интересы / Теги</span>
+            <span class="label-text-alt text-base-content/50">Влияют на рекомендации</span>
+          </label>
+          {% set user_tag_ids = profile_user.tags | map(attribute='id') | list %}
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 border border-base-300 rounded-lg bg-base-200/50">
+            {% for tag in tags %}
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-base-200 rounded p-1 transition-colors">
+              <input
+                type="checkbox"
+                name="tag_ids"
+                value="{{ tag.id }}"
+                class="checkbox checkbox-primary checkbox-sm"
+                {% if tag.id in user_tag_ids %}checked{% endif %}
+              />
+              <span class="text-sm">{{ tag.name }}</span>
+              {% if tag.category %}
+              <span class="badge badge-ghost badge-xs ml-auto">{{ tag.category.name }}</span>
+              {% endif %}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Submit -->
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="btn btn-primary flex-1">
+            <i class="fa-solid fa-floppy-disk mr-2"></i> Сохранить изменения
+          </button>
+          <a href="/users/{{ profile_user.id }}" class="btn btn-ghost">Отмена</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
