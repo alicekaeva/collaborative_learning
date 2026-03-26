@@ -139,6 +139,8 @@ async def add_user_to_group(
             await db.refresh(teacher)
             await user_crud.add_role(db, target_user, "ROLE_TEACHER")
             await db.refresh(target_user)
+        if not target_user.teacher_profile:
+            raise BadRequestError("Не удалось создать профиль преподавателя")
         group = await group_crud.add_teacher(db, group, target_user.teacher_profile)
     elif data.role == "student":
         if not target_user.student_profile:
@@ -148,6 +150,8 @@ async def add_user_to_group(
             await db.refresh(student)
             await user_crud.add_role(db, target_user, "ROLE_STUDENT")
             await db.refresh(target_user)
+        if not target_user.student_profile:
+            raise BadRequestError("Не удалось создать профиль студента")
         group = await group_crud.add_student(db, group, target_user.student_profile)
     else:
         raise BadRequestError("Роль должна быть 'teacher' или 'student'")

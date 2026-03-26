@@ -39,7 +39,7 @@ class TestRegister:
         with patch("app.api.v1.endpoints.auth.user_crud.get_by_email", return_value=existing):
             response = await client.post(REGISTER_URL, json={
                 "email": "taken@example.com",
-                "password": "pass",
+                "password": "password123",
                 "full_name": "Someone",
             })
 
@@ -48,6 +48,15 @@ class TestRegister:
     async def test_invalid_email_returns_422(self, client):
         response = await client.post(REGISTER_URL, json={
             "email": "not-an-email",
+            "password": "password123",
+            "full_name": "User",
+        })
+        assert response.status_code == 422
+
+    async def test_short_password_returns_422(self, client):
+        """Пароль короче 8 символов должен отклоняться на уровне схемы."""
+        response = await client.post(REGISTER_URL, json={
+            "email": "user@example.com",
             "password": "pass",
             "full_name": "User",
         })

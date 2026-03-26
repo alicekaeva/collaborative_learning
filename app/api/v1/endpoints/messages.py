@@ -30,6 +30,8 @@ async def list_dialogs(db: DBDep, current_user: CurrentUser):
     result = []
     for msg in messages:
         partner_id = msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
+        if partner_id is None:
+            continue
         partner = partners.get(partner_id)
         if partner:
             result.append(DialogPreview(

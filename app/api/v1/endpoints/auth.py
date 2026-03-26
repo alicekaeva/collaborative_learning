@@ -6,7 +6,7 @@ from app.core.exceptions import ConflictError, UnauthorizedError, ForbiddenError
 from app.crud import user as user_crud
 from app.schemas.auth import LoginRequest, RegisterRequest, RefreshRequest
 from app.schemas.common import TokenPair, Message
-from app.schemas.user import UserRead
+from app.schemas.user import UserRead, UserCreate
 from app.services.cache import store_refresh_token, validate_refresh_token, revoke_refresh_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def register(data: RegisterRequest, db: DBDep):
     if await user_crud.get_by_email(db, data.email):
         raise ConflictError("Пользователь с таким email уже существует")
-    user = await user_crud.create(db, data)
+    user = await user_crud.create(db, UserCreate(**data.model_dump()))
     access = create_access_token(user.id, user.roles)
     refresh = create_refresh_token(user.id)
     await store_refresh_token(user.id, refresh)
