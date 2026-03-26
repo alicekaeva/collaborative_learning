@@ -7,7 +7,6 @@ from app.core.exceptions import NotFoundError
 from app.crud import meeting as meeting_crud
 from app.crud import group as group_crud
 from app.schemas.meeting import MeetingCreate, MeetingUpdate, MeetingRead
-from app.schemas.common import Message
 
 router = APIRouter(prefix="/meetings", tags=["meetings"])
 
@@ -50,7 +49,7 @@ async def update_meeting(
     return await meeting_crud.update_meeting(db, meeting, data)
 
 
-@router.delete("/{meeting_id}", response_model=Message)
+@router.delete("/{meeting_id}", status_code=204)
 async def delete_meeting(
     meeting_id: int,
     db: DBDep,
@@ -60,4 +59,3 @@ async def delete_meeting(
     if not meeting:
         raise NotFoundError("Встреча не найдена")
     await meeting_crud.delete(db, meeting)
-    return Message(detail="Встреча удалена")

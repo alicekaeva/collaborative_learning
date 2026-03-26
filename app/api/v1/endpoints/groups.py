@@ -10,7 +10,7 @@ from app.models.student import Student
 from app.models.teacher import Teacher
 from app.schemas.group import (
     GroupCreate, GroupUpdate, GroupRead, GroupDetail,
-    AddUserToGroupRequest, EnrollRequest, UserGroupRole
+    AddGroupMemberRequest, EnrollRequest, UserGroupRole
 )
 from app.schemas.common import Message
 from app.services.cache import get_cached, set_cached
@@ -83,7 +83,7 @@ async def update_group(group_id: int, data: GroupUpdate, db: DBDep, current_user
     return await group_crud.update_group(db, group, data)
 
 
-@router.delete("/{group_id}", response_model=Message)
+@router.delete("/{group_id}", status_code=204)
 async def delete_group(group_id: int, db: DBDep, current_user: CurrentUser):
     group = await group_crud.get_by_id(db, group_id)
     if not group:
@@ -92,7 +92,6 @@ async def delete_group(group_id: int, db: DBDep, current_user: CurrentUser):
     if role != "admin" and "ROLE_ADMIN" not in current_user.roles:
         raise ForbiddenError("Только администратор группы может её удалить")
     await group_crud.delete(db, group)
-    return Message(detail="Группа удалена")
 
 
 @router.get("/{group_id}/user-role", response_model=UserGroupRole)
@@ -118,13 +117,14 @@ async def enroll_request(group_id: int, data: EnrollRequest, db: DBDep, current_
     return Message(detail="Запрос на вступление отправлен")
 
 
-@router.post("/add-user", response_model=GroupDetail)
-async def add_user_to_group(
-    data: AddUserToGroupRequest,
+@router.post("/{group_id}/members", response_model=GroupDetail, status_code=201)
+async def add_group_member(
+    group_id: int,
+    data: AddGroupMemberRequest,
     db: DBDep,
     _: User = Depends(require_roles("ROLE_ADMIN")),
 ):
-    group = await group_crud.get_by_id(db, data.group_id)
+    group = await group_crud.get_by_id(db, group_id)
     if not group:
         raise NotFoundError("Группа не найдена")
     target_user = await user_crud.get_by_id(db, data.user_id)
@@ -160,27 +160,27 @@ async def add_user_to_group(
     return _build_group_detail(group)
 
 
-@router.post("/remove-user", response_model=Message)
-async def remove_user_from_group(
-    data: AddUserToGroupRequest,
+@router.delete("/{group_id}/members/{user_id}", status_code=204)
+async def remove_group_member(
+    group_id: int,
+    user_id: int,
+    role: str,
     db: DBDep,
     _: User = Depends(require_roles("ROLE_ADMIN")),
 ):
-    group = await group_crud.get_by_id(db, data.group_id)
+    group = await group_crud.get_by_id(db, group_id)
     if not group:
         raise NotFoundError("Группа не найдена")
-    target_user = await user_crud.get_by_id(db, data.user_id)
+    target_user = await user_crud.get_by_id(db, user_id)
     if not target_user:
         raise NotFoundError("Пользователь не найден")
 
-    if data.role == "teacher" and target_user.teacher_profile:
+    if role == "teacher" and target_user.teacher_profile:
         await group_crud.remove_teacher(db, group, target_user.teacher_profile)
-    elif data.role == "student" and target_user.student_profile:
+    elif role == "student" and target_user.student_profile:
         await group_crud.remove_student(db, group, target_user.student_profile)
     else:
         raise BadRequestError("Некорректная роль или профиль не найден")
-
-    return Message(detail="Пользователь удалён из группы")
 
 
 def _build_group_detail(group) -> GroupDetail:

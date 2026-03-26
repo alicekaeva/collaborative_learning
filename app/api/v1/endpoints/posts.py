@@ -74,7 +74,7 @@ async def update_post(post_id: int, data: PostUpdate, db: DBDep, current_user: C
     return await post_crud.update_post(db, post, data)
 
 
-@router.delete("/{post_id}", response_model=Message)
+@router.delete("/{post_id}", status_code=204)
 async def delete_post(post_id: int, db: DBDep, current_user: CurrentUser):
     post = await post_crud.get_by_id(db, post_id)
     if not post:
@@ -82,7 +82,6 @@ async def delete_post(post_id: int, db: DBDep, current_user: CurrentUser):
     if post.author_id != current_user.id and "ROLE_ADMIN" not in current_user.roles:
         raise ForbiddenError("Нет доступа для удаления этого поста")
     await post_crud.delete(db, post)
-    return Message(detail="Пост удалён")
 
 
 @router.post("/{post_id}/favorite", response_model=Message)

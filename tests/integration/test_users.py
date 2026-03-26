@@ -141,29 +141,29 @@ class TestEarnPoints:
     async def test_regular_user_cannot_earn_points(self, auth_client):
         """Пользователь с ролью ROLE_USER получает 403."""
         response = await auth_client.post(
-            f"{USERS_URL}earn-points",
-            json={"student_user_id": 1, "points": 10},
+            f"{USERS_URL}1/points",
+            json={"points": 10},
         )
         assert response.status_code == 403
 
     async def test_negative_points_rejected_for_teacher(self, teacher_client):
         """Преподаватель с отрицательными баллами получает 422 от Pydantic."""
         response = await teacher_client.post(
-            f"{USERS_URL}earn-points",
-            json={"student_user_id": 1, "points": -10},
+            f"{USERS_URL}1/points",
+            json={"points": -10},
         )
         assert response.status_code == 422
 
     async def test_zero_points_rejected_for_teacher(self, teacher_client):
         response = await teacher_client.post(
-            f"{USERS_URL}earn-points",
-            json={"student_user_id": 1, "points": 0},
+            f"{USERS_URL}1/points",
+            json={"points": 0},
         )
         assert response.status_code == 422
 
     async def test_oversized_points_rejected_for_teacher(self, teacher_client):
         response = await teacher_client.post(
-            f"{USERS_URL}earn-points",
-            json={"student_user_id": 1, "points": 99999},
+            f"{USERS_URL}1/points",
+            json={"points": 99999},
         )
         assert response.status_code == 422

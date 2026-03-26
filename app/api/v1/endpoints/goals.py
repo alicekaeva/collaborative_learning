@@ -7,7 +7,6 @@ from app.core.exceptions import NotFoundError
 from app.crud import goal as goal_crud
 from app.crud import group as group_crud
 from app.schemas.goal import GoalCreate, GoalUpdate, GoalRead
-from app.schemas.common import Message
 
 router = APIRouter(prefix="/goals", tags=["goals"])
 
@@ -74,7 +73,7 @@ async def uncomplete_goal(
     return await goal_crud.set_completed(db, goal, False)
 
 
-@router.delete("/{goal_id}", response_model=Message)
+@router.delete("/{goal_id}", status_code=204)
 async def delete_goal(
     goal_id: int,
     db: DBDep,
@@ -84,4 +83,3 @@ async def delete_goal(
     if not goal:
         raise NotFoundError("Цель не найдена")
     await goal_crud.delete(db, goal)
-    return Message(detail="Цель удалена")

@@ -6,7 +6,6 @@ from app.models.user import User
 from app.core.exceptions import NotFoundError, ForbiddenError
 from app.crud import user as user_crud
 from app.schemas.user import UserRead, UserUpdate, EarnPointsRequest
-from app.schemas.common import Message
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -34,7 +33,7 @@ async def update_user(user_id: int, data: UserUpdate, db: DBDep, current_user: C
     return await user_crud.update_user(db, user, data)
 
 
-@router.delete("/{user_id}", response_model=Message)
+@router.delete("/{user_id}", status_code=204)
 async def delete_user(user_id: int, db: DBDep, current_user: CurrentUser):
     if current_user.id != user_id and "ROLE_ADMIN" not in current_user.roles:
         raise ForbiddenError("Нет доступа для удаления этого пользователя")
@@ -42,16 +41,16 @@ async def delete_user(user_id: int, db: DBDep, current_user: CurrentUser):
     if not user:
         raise NotFoundError("Пользователь не найден")
     await user_crud.delete(db, user)
-    return Message(detail="Пользователь удалён")
 
 
-@router.post("/earn-points", response_model=UserRead)
+@router.post("/{user_id}/points", response_model=UserRead)
 async def earn_points(
+    user_id: int,
     data: EarnPointsRequest,
     db: DBDep,
     _: User = Depends(require_roles("ROLE_TEACHER")),
 ):
-    user = await user_crud.get_by_id(db, data.student_user_id)
+    user = await user_crud.get_by_id(db, user_id)
     if not user:
         raise NotFoundError("Студент не найден")
     if "ROLE_STUDENT" not in user.roles:

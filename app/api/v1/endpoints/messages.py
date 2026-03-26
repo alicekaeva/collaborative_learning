@@ -10,7 +10,6 @@ from app.models.user import User as UserModel
 from app.schemas.message import (
     MessageRead, SendDirectMessageRequest, SendGroupMessageRequest, DialogPreview
 )
-from app.schemas.common import Message as ResponseMessage
 from app.schemas.user import UserShort
 
 router = APIRouter(prefix="/messages", tags=["messages"])
@@ -81,7 +80,7 @@ async def unpin_message(message_id: int, db: DBDep, current_user: CurrentUser):
     return await message_crud.unpin_message(db, msg)
 
 
-@router.delete("/{message_id}", response_model=ResponseMessage)
+@router.delete("/{message_id}", status_code=204)
 async def delete_message(message_id: int, db: DBDep, current_user: CurrentUser):
     msg = await message_crud.get_by_id(db, message_id)
     if not msg:
@@ -89,4 +88,3 @@ async def delete_message(message_id: int, db: DBDep, current_user: CurrentUser):
     if msg.sender_id != current_user.id and "ROLE_ADMIN" not in current_user.roles:
         raise ForbiddenError("Нет доступа")
     await message_crud.delete(db, msg)
-    return ResponseMessage(detail="Сообщение удалено")

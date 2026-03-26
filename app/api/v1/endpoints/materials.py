@@ -8,7 +8,6 @@ from app.core.config import settings
 from app.core.exceptions import NotFoundError, ForbiddenError, BadRequestError
 from app.crud import material as material_crud
 from app.schemas.material import MaterialRead, MaterialUpdate
-from app.schemas.common import Message
 from app.services.storage import save_material, delete_file
 
 router = APIRouter(prefix="/materials", tags=["materials"])
@@ -77,7 +76,7 @@ async def update_material(material_id: int, data: MaterialUpdate, db: DBDep, cur
     return await material_crud.update_material(db, material, data)
 
 
-@router.delete("/{material_id}", response_model=Message)
+@router.delete("/{material_id}", status_code=204)
 async def delete_material(material_id: int, db: DBDep, current_user: CurrentUser):
     material = await material_crud.get_by_id(db, material_id)
     if not material:
@@ -86,4 +85,3 @@ async def delete_material(material_id: int, db: DBDep, current_user: CurrentUser
         raise ForbiddenError("Нет доступа")
     await delete_file(material.file_link)
     await material_crud.delete(db, material)
-    return Message(detail="Материал удалён")

@@ -5,9 +5,12 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 from app.core.config import settings
 from app.core.exceptions import RedirectException
+from app.core.limiter import limiter
 from app.api.v1.router import api_router
 from app.web.router import web_router
 from app.services.cache import close_redis
@@ -32,6 +35,9 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 _allow_credentials = "*" not in settings.ALLOWED_ORIGINS
 app.add_middleware(

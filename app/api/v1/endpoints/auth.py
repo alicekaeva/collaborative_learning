@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 
 from app.api.deps import DBDep, CurrentUser
+from app.core.limiter import limiter
 from app.core.security import create_access_token, create_refresh_token
 from app.core.exceptions import ConflictError, UnauthorizedError, ForbiddenError
 from app.crud import user as user_crud
@@ -13,7 +14,8 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=TokenPair, status_code=201)
-async def register(data: RegisterRequest, db: DBDep):
+@limiter.limit("10/minute")
+async def register(request: Request, data: RegisterRequest, db: DBDep):
     if await user_crud.get_by_email(db, data.email):
         raise ConflictError("Пользователь с таким email уже существует")
     user = await user_crud.create(db, UserCreate(**data.model_dump()))
@@ -24,7 +26,8 @@ async def register(data: RegisterRequest, db: DBDep):
 
 
 @router.post("/login", response_model=TokenPair)
-async def login(data: LoginRequest, db: DBDep):
+@limiter.limit("20/minute")
+async def login(request: Request, data: LoginRequest, db: DBDep):
     user = await user_crud.get_by_email(db, data.email)
     if not user or not user_crud.authenticate(user, data.password):
         raise UnauthorizedError("Неверный email или пароль")

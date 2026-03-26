@@ -42,6 +42,11 @@ class AddUserToGroupRequest(BaseModel):
     role: str  # "teacher" | "student"
 
 
+class AddGroupMemberRequest(BaseModel):
+    user_id: int
+    role: str  # "teacher" | "student"
+
+
 class ChangeUserRoleRequest(BaseModel):
     group_id: int
     user_id: int

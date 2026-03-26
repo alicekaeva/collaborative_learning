@@ -46,5 +46,4 @@ class UserShort(BaseModel):
 
 
 class EarnPointsRequest(BaseModel):
-    student_user_id: int
     points: int = Field(gt=0, le=10000)

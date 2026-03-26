@@ -7,7 +7,6 @@ from app.core.exceptions import NotFoundError
 from app.crud import task as task_crud
 from app.crud import group as group_crud
 from app.schemas.task import TaskCreate, TaskUpdate, TaskRead
-from app.schemas.common import Message
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
@@ -50,7 +49,7 @@ async def update_task(
     return await task_crud.update_task(db, task, data)
 
 
-@router.delete("/{task_id}", response_model=Message)
+@router.delete("/{task_id}", status_code=204)
 async def delete_task(
     task_id: int,
     db: DBDep,
@@ -60,4 +59,3 @@ async def delete_task(
     if not task:
         raise NotFoundError("Задание не найдено")
     await task_crud.delete(db, task)
-    return Message(detail="Задание удалено")

@@ -6,7 +6,6 @@ from app.models.user import User
 from app.core.exceptions import NotFoundError
 from app.crud import tag as tag_crud
 from app.schemas.tag import TagCreate, TagUpdate, TagRead
-from app.schemas.common import Message
 
 router = APIRouter(prefix="/tags", tags=["tags"])
 
@@ -14,16 +13,6 @@ router = APIRouter(prefix="/tags", tags=["tags"])
 @router.get("/", response_model=List[TagRead])
 async def list_tags(db: DBDep):
     tags = await tag_crud.get_all(db)
-    return [
-        TagRead(id=t.id, name=t.name, category_id=t.category_id,
-                category_name=t.category.name if t.category else None)
-        for t in tags
-    ]
-
-
-@router.get("/by-category/{category_id}", response_model=List[TagRead])
-async def tags_by_category(category_id: int, db: DBDep):
-    tags = await tag_crud.get_by_category(db, category_id)
     return [
         TagRead(id=t.id, name=t.name, category_id=t.category_id,
                 category_name=t.category.name if t.category else None)
@@ -64,7 +53,7 @@ async def update_tag(
     return await tag_crud.update_tag(db, tag, data)
 
 
-@router.delete("/{tag_id}", response_model=Message)
+@router.delete("/{tag_id}", status_code=204)
 async def delete_tag(
     tag_id: int,
     db: DBDep,
@@ -74,4 +63,3 @@ async def delete_tag(
     if not tag:
         raise NotFoundError("Тег не найден")
     await tag_crud.delete(db, tag)
-    return Message(detail="Тег удалён")
