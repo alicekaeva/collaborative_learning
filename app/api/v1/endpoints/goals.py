@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 
 from app.api.deps import DBDep, CurrentUser, require_roles
 from app.models.user import User
-from app.core.exceptions import NotFoundError, ForbiddenError
+from app.core.exceptions import NotFoundError
 from app.crud import goal as goal_crud
 from app.crud import group as group_crud
 from app.schemas.goal import GoalCreate, GoalUpdate, GoalRead

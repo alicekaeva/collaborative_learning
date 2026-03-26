@@ -1,17 +1,16 @@
 from typing import List, Optional
-from sqlalchemy import select
 from fastapi import APIRouter, Depends
 
 from app.api.deps import DBDep, CurrentUser, require_roles
 from app.models.user import User
-from app.core.exceptions import NotFoundError, ForbiddenError, BadRequestError, ConflictError
+from app.core.exceptions import NotFoundError, ForbiddenError, BadRequestError
 from app.crud import group as group_crud
 from app.crud import user as user_crud
 from app.models.student import Student
 from app.models.teacher import Teacher
 from app.schemas.group import (
     GroupCreate, GroupUpdate, GroupRead, GroupDetail,
-    AddUserToGroupRequest, ChangeUserRoleRequest, EnrollRequest, UserGroupRole
+    AddUserToGroupRequest, EnrollRequest, UserGroupRole
 )
 from app.schemas.common import Message
 from app.services.cache import get_cached, set_cached

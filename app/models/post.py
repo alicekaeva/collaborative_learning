@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 from sqlalchemy import Text, Integer, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

@@ -3,7 +3,6 @@ from sqlalchemy import select, desc, or_, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.message import Message
-from app.models.user import User
 
 
 async def get_by_id(db: AsyncSession, message_id: int) -> Optional[Message]:

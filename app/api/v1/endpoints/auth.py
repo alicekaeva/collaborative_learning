@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.api.deps import DBDep, CurrentUser
 from app.core.security import create_access_token, create_refresh_token
-from app.core.exceptions import ConflictError, UnauthorizedError, BadRequestError, ForbiddenError
+from app.core.exceptions import ConflictError, UnauthorizedError, ForbiddenError
 from app.crud import user as user_crud
 from app.schemas.auth import LoginRequest, RegisterRequest, RefreshRequest
 from app.schemas.common import TokenPair, Message

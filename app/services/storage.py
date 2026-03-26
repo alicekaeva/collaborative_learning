@@ -1,5 +1,4 @@
 import asyncio
-import os
 import uuid
 import aiofiles
 from pathlib import Path

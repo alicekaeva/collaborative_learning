@@ -1,7 +1,6 @@
 """Интеграционные тесты для /api/v1/groups/* — создание групп, роли, запись."""
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.conftest import make_user
 
 
 GROUPS_URL = "/api/v1/groups/"

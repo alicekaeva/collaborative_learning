@@ -1,7 +1,6 @@
 from typing import Optional
 from pathlib import Path
 
-from fastapi import Request
 from fastapi.responses import RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 

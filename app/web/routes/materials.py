@@ -1,7 +1,6 @@
 import os
 import uuid
 from pathlib import Path
-from typing import Optional
 
 from fastapi import APIRouter, Request, Form, File, UploadFile
 from fastapi.responses import RedirectResponse, HTMLResponse

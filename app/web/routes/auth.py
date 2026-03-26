@@ -5,7 +5,7 @@ from app.api.deps import DBDep
 from app.crud import user as user_crud
 from app.core.security import create_access_token
 from app.schemas.user import UserCreate
-from app.web.utils import templates, set_auth_cookie, clear_auth_cookie, redirect
+from app.web.utils import templates, set_auth_cookie, clear_auth_cookie
 
 router = APIRouter(tags=["web:auth"])
 

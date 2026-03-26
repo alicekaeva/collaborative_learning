@@ -5,6 +5,7 @@ from sqlalchemy import select
 from app.api.deps import DBDep, CurrentUser
 from app.core.exceptions import NotFoundError, ForbiddenError
 from app.crud import message as message_crud
+from app.crud import user as user_crud
 from app.models.user import User as UserModel
 from app.schemas.message import (
     MessageRead, SendDirectMessageRequest, SendGroupMessageRequest, DialogPreview

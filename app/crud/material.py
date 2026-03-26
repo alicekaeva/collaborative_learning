@@ -1,9 +1,8 @@
 from typing import Optional, List
-from sqlalchemy import select, or_
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.material import Material
-from app.models.tag import Tag
 from app.schemas.material import MaterialUpdate
 
 
