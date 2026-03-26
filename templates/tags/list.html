@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Теги — Администрирование{% endblock %}
+
+{% block body %}
+<div class="max-w-4xl mx-auto flex flex-col gap-5">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-tags text-primary mr-2"></i>Теги
+      </h1>
+      <p class="text-base-content/60 text-sm mt-1">Управление тегами платформы</p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/categories" class="btn btn-ghost btn-sm gap-1">
+        <i class="fa-solid fa-folder"></i> Категории
+      </a>
+      <a href="/tags/new" class="btn btn-primary btn-sm gap-1">
+        <i class="fa-solid fa-plus"></i> Создать тег
+      </a>
+    </div>
+  </div>
+
+  <!-- Tags table -->
+  <div class="card bg-base-100 shadow-lg overflow-hidden">
+    {% if tags %}
+    <div class="overflow-x-auto">
+      <table class="table table-zebra w-full">
+        <thead>
+          <tr>
+            <th class="w-12 text-base-content/50">#</th>
+            <th>Название</th>
+            <th>Категория</th>
+            <th class="w-32 text-right">Действия</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tag in tags %}
+          <tr>
+            <td class="text-base-content/40 text-sm">{{ tag.id }}</td>
+            <td>
+              <span class="badge badge-outline">{{ tag.name }}</span>
+            </td>
+            <td>
+              {% if tag.category %}
+              <span class="badge badge-ghost badge-sm">
+                <i class="fa-solid fa-folder fa-xs mr-1"></i>{{ tag.category.name }}
+              </span>
+              {% else %}
+              <span class="text-base-content/30 text-sm">—</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="flex gap-1 justify-end">
+                <a href="/tags/{{ tag.id }}/edit" class="btn btn-ghost btn-xs btn-circle text-info" title="Редактировать">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </a>
+                <form action="/tags/{{ tag.id }}/delete" method="POST"
+                      onsubmit="return confirm('Удалить тег «{{ tag.name }}»?')">
+                  <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="card-body items-center text-center py-16">
+      <i class="fa-solid fa-tags text-5xl text-base-content/20 mb-4"></i>
+      <h3 class="text-lg font-semibold text-base-content/60">Тегов нет</h3>
+      <p class="text-base-content/40 text-sm">Создайте первый тег для категоризации контента.</p>
+      <a href="/tags/new" class="btn btn-primary btn-sm mt-4">
+        <i class="fa-solid fa-plus mr-1"></i> Создать тег
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if tags %}
+  <p class="text-sm text-base-content/50 text-right">Всего тегов: {{ tags | length }}</p>
+  {% endif %}
+
+</div>
+{% endblock %}

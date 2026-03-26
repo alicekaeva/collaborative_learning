@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="emerald">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Вход — Совместное обучение</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body class="min-h-screen bg-base-200 flex items-center justify-center p-4">
+
+  {% set flash = flash if flash is defined else request.cookies.get('flash_message') %}
+  {% if flash %}
+  <div id="flash-alert" class="alert alert-success shadow-lg fixed top-4 left-1/2 -translate-x-1/2 w-auto max-w-md z-50 flex items-center gap-2">
+    <i class="fa-solid fa-circle-check text-xl flex-shrink-0"></i>
+    <span class="flex-1">{{ flash }}</span>
+    <button onclick="document.getElementById('flash-alert').remove()" class="btn btn-ghost btn-xs btn-circle">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  {% endif %}
+
+  <div class="card w-full max-w-md bg-base-100 shadow-xl">
+    <div class="card-body p-8">
+      <!-- Logo / Header -->
+      <div class="text-center mb-6">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+          <i class="fa-solid fa-book-open-reader text-3xl text-primary"></i>
+        </div>
+        <h1 class="text-2xl font-bold text-base-content">Добро пожаловать!</h1>
+        <p class="text-base-content/60 mt-1">Войдите в свой аккаунт</p>
+      </div>
+
+      <!-- Error message -->
+      {% if error %}
+      <div class="alert alert-error mb-4">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        <span>{{ error }}</span>
+      </div>
+      {% endif %}
+
+      <!-- Login form -->
+      <form action="/login" method="POST" class="space-y-4">
+        <div class="form-control">
+          <label class="label" for="email">
+            <span class="label-text font-medium">Email</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-envelope text-base-content/40"></i>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              class="grow"
+              placeholder="your@email.com"
+              required
+              autocomplete="email"
+            />
+          </label>
+        </div>
+
+        <div class="form-control">
+          <label class="label" for="password">
+            <span class="label-text font-medium">Пароль</span>
+          </label>
+          <label class="input input-bordered flex items-center gap-2">
+            <i class="fa-solid fa-lock text-base-content/40"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="grow"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            />
+          </label>
+        </div>
+
+        <div class="form-control mt-6">
+          <button type="submit" class="btn btn-primary w-full">
+            <i class="fa-solid fa-right-to-bracket mr-2"></i>
+            Войти
+          </button>
+        </div>
+      </form>
+
+      <div class="divider text-base-content/40">или</div>
+
+      <p class="text-center text-sm text-base-content/70">
+        Нет аккаунта?
+        <a href="/register" class="link link-primary font-medium">Зарегистрироваться</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var el = document.getElementById('flash-alert');
+      if (el) {
+        setTimeout(function() { el.style.transition = 'opacity 0.5s'; el.style.opacity = '0'; setTimeout(function(){ el.remove(); }, 500); }, 4000);
+      }
+    })();
+  </script>
+</body>
+</html>
