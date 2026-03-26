@@ -1,3 +1,4 @@
+import asyncio
 import os
 import uuid
 import aiofiles
@@ -29,6 +30,23 @@ ALLOWED_MIME_TYPES = {
     "application/x-zip-compressed",
 }
 
+# Byte sequences that indicate executable/scripting content regardless of declared MIME type
+_DANGEROUS_SIGNATURES: list[bytes] = [
+    b"<?php",
+    b"<?\n",
+    b"<?\r",
+    b"#!/",
+    b"\x7fELF",   # ELF executable (Linux)
+    b"MZ",         # PE executable (Windows)
+    b"<script",
+]
+
+
+def _is_dangerous_content(data: bytes) -> bool:
+    """Return True if the file starts with a known dangerous byte sequence."""
+    head = data[:512].lower()
+    return any(head.startswith(sig.lower()) for sig in _DANGEROUS_SIGNATURES)
+
 
 async def save_material(file: UploadFile) -> tuple[str, str]:
     """Save uploaded file to disk. Returns (file_link, mime_type)."""
@@ -37,6 +55,9 @@ async def save_material(file: UploadFile) -> tuple[str, str]:
 
     # Check size
     contents = await file.read()
+
+    if _is_dangerous_content(contents):
+        raise BadRequestError("Содержимое файла не соответствует допустимому типу")
     if len(contents) > settings.MAX_FILE_SIZE:
         raise BadRequestError(f"Файл превышает максимально допустимый размер {settings.MAX_FILE_SIZE_MB}MB")
 
@@ -59,4 +80,4 @@ async def delete_file(file_link: str) -> None:
     filename = Path(file_link).name
     file_path = Path(settings.UPLOAD_DIR) / filename
     if file_path.exists():
-        os.remove(file_path)
+        await asyncio.to_thread(file_path.unlink, True)

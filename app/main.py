@@ -1,11 +1,13 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.core.config import settings
+from app.core.exceptions import RedirectException
 from app.api.v1.router import api_router
 from app.web.router import web_router
 from app.services.cache import close_redis
@@ -31,10 +33,11 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+_allow_credentials = "*" not in settings.ALLOWED_ORIGINS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_credentials=_allow_credentials,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -47,6 +50,11 @@ app.include_router(web_router)
 
 # REST API
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.exception_handler(RedirectException)
+async def redirect_exception_handler(request: Request, exc: RedirectException) -> RedirectResponse:
+    return RedirectResponse(exc.url, status_code=303)
 
 
 @app.get("/health", tags=["health"])

@@ -1,3 +1,4 @@
+import asyncio
 import json
 from typing import Optional, Any
 import redis.asyncio as aioredis
@@ -5,12 +6,15 @@ import redis.asyncio as aioredis
 from app.core.config import settings
 
 _redis: Optional[aioredis.Redis] = None
+_redis_lock = asyncio.Lock()
 
 
 async def get_redis() -> aioredis.Redis:
     global _redis
     if _redis is None:
-        _redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
+        async with _redis_lock:
+            if _redis is None:
+                _redis = aioredis.from_url(settings.REDIS_URL, decode_responses=True)
     return _redis
 
 

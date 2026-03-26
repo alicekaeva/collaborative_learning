@@ -2,7 +2,7 @@ from fastapi import APIRouter
 
 from app.api.deps import DBDep, CurrentUser
 from app.core.security import create_access_token, create_refresh_token
-from app.core.exceptions import ConflictError, UnauthorizedError, BadRequestError
+from app.core.exceptions import ConflictError, UnauthorizedError, BadRequestError, ForbiddenError
 from app.crud import user as user_crud
 from app.schemas.auth import LoginRequest, RegisterRequest, RefreshRequest
 from app.schemas.common import TokenPair, Message
@@ -51,6 +51,9 @@ async def refresh_tokens(data: RefreshRequest, db: DBDep):
 
 @router.post("/logout", response_model=Message)
 async def logout(data: RefreshRequest, current_user: CurrentUser):
+    token_owner_id = await validate_refresh_token(data.refresh_token)
+    if token_owner_id != current_user.id:
+        raise ForbiddenError("Токен не принадлежит текущему пользователю")
     await revoke_refresh_token(data.refresh_token)
     return Message(detail="Выход выполнен успешно")
 

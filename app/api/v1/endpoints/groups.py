@@ -7,7 +7,6 @@ from app.models.user import User
 from app.core.exceptions import NotFoundError, ForbiddenError, BadRequestError, ConflictError
 from app.crud import group as group_crud
 from app.crud import user as user_crud
-from app.models.admin import Admin
 from app.models.student import Student
 from app.models.teacher import Teacher
 from app.schemas.group import (
@@ -56,16 +55,14 @@ async def my_groups(db: DBDep, current_user: CurrentUser):
 
 
 @router.post("/", response_model=GroupDetail, status_code=201)
-async def create_group(data: GroupCreate, db: DBDep, current_user: CurrentUser):
-    # Ensure user has admin profile, create if missing
-    admin = current_user.admin_profile
-    if not admin:
-        admin = Admin(user_id=current_user.id)
-        db.add(admin)
-        await db.commit()
-        await db.refresh(admin)
-        await user_crud.add_role(db, current_user, "ROLE_ADMIN")
-    return await group_crud.create(db, data, admin)
+async def create_group(
+    data: GroupCreate,
+    db: DBDep,
+    current_user: User = Depends(require_roles("ROLE_ADMIN")),
+):
+    if not current_user.admin_profile:
+        raise ForbiddenError("Профиль администратора не найден")
+    return await group_crud.create(db, data, current_user.admin_profile)
 
 
 @router.get("/{group_id}", response_model=GroupDetail)

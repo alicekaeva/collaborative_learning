@@ -28,7 +28,7 @@ class User(IDMixin, Base):
     alma_mater: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     points_amount: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     roles: Mapped[List[str]] = mapped_column(ARRAY(String), default=list, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(default=func.now(), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now(), nullable=False)
 
     tags: Mapped[List["Tag"]] = relationship(
         "Tag", secondary=user_tag_table, back_populates="users", lazy="selectin"

@@ -12,12 +12,12 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("/", response_model=List[UserRead])
-async def list_users(db: DBDep, skip: int = 0, limit: int = 100):
+async def list_users(db: DBDep, current_user: CurrentUser, skip: int = 0, limit: int = 100):
     return await user_crud.get_all(db, skip=skip, limit=limit)
 
 
 @router.get("/{user_id}", response_model=UserRead)
-async def get_user(user_id: int, db: DBDep):
+async def get_user(user_id: int, db: DBDep, current_user: CurrentUser):
     user = await user_crud.get_by_id(db, user_id)
     if not user:
         raise NotFoundError("Пользователь не найден")

@@ -1,14 +1,16 @@
 from typing import List
 from fastapi import APIRouter
+from sqlalchemy import select
 
 from app.api.deps import DBDep, CurrentUser
 from app.core.exceptions import NotFoundError, ForbiddenError
 from app.crud import message as message_crud
-from app.crud import user as user_crud
+from app.models.user import User as UserModel
 from app.schemas.message import (
     MessageRead, SendDirectMessageRequest, SendGroupMessageRequest, DialogPreview
 )
 from app.schemas.common import Message as ResponseMessage
+from app.schemas.user import UserShort
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 
@@ -16,12 +18,19 @@ router = APIRouter(prefix="/messages", tags=["messages"])
 @router.get("/dialogs", response_model=List[DialogPreview])
 async def list_dialogs(db: DBDep, current_user: CurrentUser):
     messages = await message_crud.get_user_dialogs(db, current_user.id)
+
+    partner_ids = list({
+        msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
+        for msg in messages
+    })
+    partners_result = await db.execute(select(UserModel).where(UserModel.id.in_(partner_ids)))
+    partners = {u.id: u for u in partners_result.scalars().all()}
+
     result = []
     for msg in messages:
         partner_id = msg.receiver_id if msg.sender_id == current_user.id else msg.sender_id
-        partner = await user_crud.get_by_id(db, partner_id)
+        partner = partners.get(partner_id)
         if partner:
-            from app.schemas.user import UserShort
             result.append(DialogPreview(
                 user=UserShort.model_validate(partner),
                 last_message=msg.content[:100],

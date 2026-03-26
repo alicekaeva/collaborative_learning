@@ -5,7 +5,7 @@ from pathlib import Path
 
 from app.api.deps import DBDep, CurrentUser
 from app.core.config import settings
-from app.core.exceptions import NotFoundError, ForbiddenError
+from app.core.exceptions import NotFoundError, ForbiddenError, BadRequestError
 from app.crud import material as material_crud
 from app.schemas.material import MaterialRead, MaterialUpdate
 from app.schemas.common import Message
@@ -58,7 +58,10 @@ async def download_material(material_id: int, db: DBDep, current_user: CurrentUs
     if material.is_private and material.creator_user_id != current_user.id:
         raise ForbiddenError("Это приватный материал")
     filename = Path(material.file_link).name
-    file_path = Path(settings.UPLOAD_DIR) / filename
+    upload_dir = Path(settings.UPLOAD_DIR).resolve()
+    file_path = (upload_dir / filename).resolve()
+    if not str(file_path).startswith(str(upload_dir)):
+        raise BadRequestError("Недопустимый путь к файлу")
     if not file_path.exists():
         raise NotFoundError("Файл не найден на диске")
     return FileResponse(str(file_path), media_type=material.mime_type, filename=material.name)

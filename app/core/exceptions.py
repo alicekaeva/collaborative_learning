@@ -28,3 +28,10 @@ class ConflictError(HTTPException):
 class BadRequestError(HTTPException):
     def __init__(self, detail: str = "Некорректный запрос"):
         super().__init__(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
+
+
+class RedirectException(Exception):
+    """Raised from web-layer dependencies to trigger a 303 redirect response."""
+
+    def __init__(self, url: str) -> None:
+        self.url = url

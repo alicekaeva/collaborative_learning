@@ -3,6 +3,7 @@ from fastapi import Request, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import get_db
 from app.core.security import decode_token
+from app.core.exceptions import RedirectException
 from app.models.user import User
 from app.crud import user as user_crud
 
@@ -21,9 +22,7 @@ async def get_current_user_optional(request: Request, db: AsyncSession = Depends
 async def get_current_user_required(request: Request, db: AsyncSession = Depends(get_db)) -> User:
     user = await get_current_user_optional(request, db)
     if not user:
-        from fastapi.responses import RedirectResponse
-        # We can't redirect from a Depends easily, so raise and handle in route
-        raise Exception("redirect:/login")
+        raise RedirectException("/login")
     return user
 
 

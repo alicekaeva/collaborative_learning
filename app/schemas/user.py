@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from app.schemas.tag import TagRead
 
 
@@ -47,4 +47,4 @@ class UserShort(BaseModel):
 
 class EarnPointsRequest(BaseModel):
     student_user_id: int
-    points: int
+    points: int = Field(gt=0, le=10000)
