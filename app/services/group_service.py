@@ -41,8 +41,8 @@ class GroupService:
 
     async def add_member(self, group_id: int, user_id: int, role: str) -> Group:
         """
-        Creates role profile if absent, assigns system role, adds to group.
-        Previously this logic lived directly in the endpoint handler.
+        Atomically creates role profile if absent, assigns system role, and adds to group.
+        All writes happen in a single transaction (no intermediate commits).
         """
         group = await self._get_or_404(group_id)
         target_user = await self._get_user_with_profiles(user_id)
@@ -51,27 +51,34 @@ class GroupService:
             if not target_user.teacher_profile:
                 teacher = Teacher(user_id=target_user.id)
                 self._db.add(teacher)
-                await self._db.flush()  # flush, not commit — keeps operation atomic
-                await user_crud.add_role(self._db, target_user, "ROLE_TEACHER")
                 await self._db.flush()
-                await self._db.refresh(target_user)
+                # Reload target_user so teacher_profile is visible in this transaction
+                target_user = await self._get_user_with_profiles(target_user.id)
             if not target_user.teacher_profile:
                 raise BadRequestError("Не удалось создать профиль преподавателя")
-            return await group_crud.add_teacher(self._db, group, target_user.teacher_profile)
+            # Assign role in-memory (no commit) so the whole operation is atomic
+            if "ROLE_TEACHER" not in target_user.roles:
+                target_user.roles = target_user.roles + ["ROLE_TEACHER"]
+            await group_crud.add_teacher(self._db, group, target_user.teacher_profile)
 
-        if role == "student":
+        elif role == "student":
             if not target_user.student_profile:
                 student = Student(user_id=target_user.id)
                 self._db.add(student)
                 await self._db.flush()
-                await user_crud.add_role(self._db, target_user, "ROLE_STUDENT")
-                await self._db.flush()
-                await self._db.refresh(target_user)
+                target_user = await self._get_user_with_profiles(target_user.id)
             if not target_user.student_profile:
                 raise BadRequestError("Не удалось создать профиль студента")
-            return await group_crud.add_student(self._db, group, target_user.student_profile)
+            if "ROLE_STUDENT" not in target_user.roles:
+                target_user.roles = target_user.roles + ["ROLE_STUDENT"]
+            await group_crud.add_student(self._db, group, target_user.student_profile)
 
-        raise BadRequestError("Роль должна быть 'teacher' или 'student'")
+        else:
+            raise BadRequestError("Роль должна быть 'teacher' или 'student'")
+
+        # Single commit for the entire operation
+        await self._db.commit()
+        return await group_crud.get_by_id_with_details(self._db, group_id)
 
     async def remove_member(self, group_id: int, user_id: int, role: str) -> None:
         group = await self._get_or_404(group_id)
@@ -79,8 +86,23 @@ class GroupService:
 
         if role == "teacher" and target_user.teacher_profile:
             await group_crud.remove_teacher(self._db, group, target_user.teacher_profile)
+            # Check if user is still a teacher in any other group before removing system role
+            remaining = await self._db.execute(
+                select(Group).where(
+                    Group.teachers.any(Teacher.id == target_user.teacher_profile.id)
+                )
+            )
+            if not remaining.scalars().first():
+                await user_crud.remove_role(self._db, target_user, "ROLE_TEACHER")
         elif role == "student" and target_user.student_profile:
             await group_crud.remove_student(self._db, group, target_user.student_profile)
+            remaining = await self._db.execute(
+                select(Group).where(
+                    Group.students.any(Student.id == target_user.student_profile.id)
+                )
+            )
+            if not remaining.scalars().first():
+                await user_crud.remove_role(self._db, target_user, "ROLE_STUDENT")
         else:
             raise BadRequestError("Некорректная роль или профиль не найден")
 
@@ -101,7 +123,8 @@ class GroupService:
         cache_key = f"groups:recommended:{current_user.id}"
         cached = await get_cached(cache_key)
         if cached:
-            return cached
+            # Deserialize back to GroupRead instances, not raw dicts
+            return [GroupRead.model_validate(item) for item in cached]
         tag_ids = [t.id for t in current_user.tags]
         groups = await group_crud.get_recommended(self._db, tag_ids)
         result = [GroupRead.model_validate(g) for g in groups]

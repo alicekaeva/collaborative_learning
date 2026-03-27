@@ -1,4 +1,6 @@
-from typing import Annotated
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Annotated
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select
@@ -11,6 +13,10 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.student import Student
 from app.models.teacher import Teacher
+
+if TYPE_CHECKING:
+    from app.services.auth_service import AuthService
+    from app.services.group_service import GroupService
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -56,20 +62,15 @@ def require_roles(*roles: str):
 
 # ------------------------------------------------------------------ service deps
 
-def _get_auth_service(db: DBDep) -> "AuthService":
+def _get_auth_service(db: DBDep) -> AuthService:
     from app.services.auth_service import AuthService
     return AuthService(db)
 
 
-def _get_group_service(db: DBDep) -> "GroupService":
+def _get_group_service(db: DBDep) -> GroupService:
     from app.services.group_service import GroupService
     return GroupService(db)
 
 
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from app.services.auth_service import AuthService
-    from app.services.group_service import GroupService
-
-AuthServiceDep = Annotated["AuthService", Depends(_get_auth_service)]
-GroupServiceDep = Annotated["GroupService", Depends(_get_group_service)]
+AuthServiceDep = Annotated[AuthService, Depends(_get_auth_service)]
+GroupServiceDep = Annotated[GroupService, Depends(_get_group_service)]

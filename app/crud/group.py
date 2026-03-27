@@ -1,10 +1,11 @@
 from typing import Optional, List
-from sqlalchemy import select, exists, and_, literal, update
+from sqlalchemy import select, exists, and_, false, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.group import Group
 from app.models.tag import Tag
+from app.models.category import Category
 from app.models.user import User
 from app.models.student import Student
 from app.models.teacher import Teacher
@@ -13,8 +14,30 @@ from app.models.associations import group_teacher_table, group_student_table
 from app.schemas.group import GroupCreate, GroupUpdate
 
 
+# ------------------------------------------------------------------ load options
+
+def _detail_options() -> list:
+    """Selectinload chain required for GroupDetail serialization."""
+    return [
+        selectinload(Group.teachers).selectinload(Teacher.user),
+        selectinload(Group.students).selectinload(Student.user),
+        selectinload(Group.tags).selectinload(Tag.category),
+        selectinload(Group.administrator),
+    ]
+
+
+# ------------------------------------------------------------------ queries
+
 async def get_by_id(db: AsyncSession, group_id: int) -> Optional[Group]:
     result = await db.execute(select(Group).where(Group.id == group_id))
+    return result.scalar_one_or_none()
+
+
+async def get_by_id_with_details(db: AsyncSession, group_id: int) -> Optional[Group]:
+    """Load a Group with all relationships needed for GroupDetail serialization."""
+    result = await db.execute(
+        select(Group).where(Group.id == group_id).options(*_detail_options())
+    )
     return result.scalar_one_or_none()
 
 
@@ -98,7 +121,11 @@ async def create(db: AsyncSession, data: GroupCreate, admin: Admin) -> Group:
     db.add(group)
     await db.commit()
     await db.refresh(group)
-    return group
+    # Reload with full detail for serialization
+    result = await db.execute(
+        select(Group).where(Group.id == group.id).options(*_detail_options())
+    )
+    return result.scalar_one()
 
 
 async def update_group(db: AsyncSession, group: Group, data: GroupUpdate) -> Group:
@@ -123,8 +150,11 @@ async def update_group(db: AsyncSession, group: Group, data: GroupUpdate) -> Gro
         group.tags = list(tags_result.scalars().all())
 
     await db.commit()
-    await db.refresh(group)
-    return group
+    # Reload with full detail for serialization
+    result = await db.execute(
+        select(Group).where(Group.id == group.id).options(*_detail_options())
+    )
+    return result.scalar_one()
 
 
 async def delete(db: AsyncSession, group: Group) -> None:
@@ -146,6 +176,7 @@ async def get_user_role_in_group(
     if teacher_id is None and student_id is None:
         return None
 
+    # false() is an explicitly-typed SQL FALSE literal (unlike literal(False))
     is_teacher_expr = (
         exists().where(
             and_(
@@ -154,7 +185,7 @@ async def get_user_role_in_group(
             )
         )
         if teacher_id is not None
-        else literal(False)
+        else false()
     )
     is_student_expr = (
         exists().where(
@@ -164,7 +195,7 @@ async def get_user_role_in_group(
             )
         )
         if student_id is not None
-        else literal(False)
+        else false()
     )
 
     row = (await db.execute(select(is_teacher_expr, is_student_expr))).one()
@@ -175,36 +206,32 @@ async def get_user_role_in_group(
     return None
 
 
-async def add_teacher(db: AsyncSession, group: Group, teacher: Teacher) -> Group:
+async def add_teacher(db: AsyncSession, group: Group, teacher: Teacher) -> None:
+    """Append teacher to group; caller is responsible for commit."""
     result = await db.execute(
         select(Group).where(Group.id == group.id).options(selectinload(Group.teachers))
     )
-    group = result.scalar_one()
-    if not any(t.id == teacher.id for t in group.teachers):
-        group.teachers.append(teacher)
-        await db.commit()
-        await db.refresh(group)
-    return group
+    loaded = result.scalar_one()
+    if not any(t.id == teacher.id for t in loaded.teachers):
+        loaded.teachers.append(teacher)
 
 
-async def add_student(db: AsyncSession, group: Group, student: Student) -> Group:
+async def add_student(db: AsyncSession, group: Group, student: Student) -> None:
+    """Append student to group; caller is responsible for commit."""
     result = await db.execute(
         select(Group).where(Group.id == group.id).options(selectinload(Group.students))
     )
-    group = result.scalar_one()
-    if not any(s.id == student.id for s in group.students):
-        group.students.append(student)
-        await db.commit()
-        await db.refresh(group)
-    return group
+    loaded = result.scalar_one()
+    if not any(s.id == student.id for s in loaded.students):
+        loaded.students.append(student)
 
 
 async def remove_teacher(db: AsyncSession, group: Group, teacher: Teacher) -> None:
     result = await db.execute(
         select(Group).where(Group.id == group.id).options(selectinload(Group.teachers))
     )
-    group = result.scalar_one()
-    group.teachers = [t for t in group.teachers if t.id != teacher.id]
+    loaded = result.scalar_one()
+    loaded.teachers = [t for t in loaded.teachers if t.id != teacher.id]
     await db.commit()
 
 
@@ -212,6 +239,6 @@ async def remove_student(db: AsyncSession, group: Group, student: Student) -> No
     result = await db.execute(
         select(Group).where(Group.id == group.id).options(selectinload(Group.students))
     )
-    group = result.scalar_one()
-    group.students = [s for s in group.students if s.id != student.id]
+    loaded = result.scalar_one()
+    loaded.students = [s for s in loaded.students if s.id != student.id]
     await db.commit()

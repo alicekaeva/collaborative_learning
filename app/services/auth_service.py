@@ -38,6 +38,8 @@ class AuthService:
 
     async def logout(self, data: RefreshRequest, current_user: User) -> Message:
         token_owner_id = await validate_refresh_token(data.refresh_token)
+        if not token_owner_id:
+            raise UnauthorizedError("Недействительный или истёкший refresh токен")
         if token_owner_id != current_user.id:
             raise ForbiddenError("Токен не принадлежит текущему пользователю")
         await revoke_refresh_token(data.refresh_token)

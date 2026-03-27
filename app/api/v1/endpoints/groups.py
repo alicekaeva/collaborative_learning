@@ -51,7 +51,7 @@ async def create_group(
 
 @router.get("/{group_id}", response_model=GroupDetail)
 async def get_group(group_id: int, db: DBDep):
-    group = await group_crud.get_by_id(db, group_id)
+    group = await group_crud.get_by_id_with_details(db, group_id)
     if not group:
         raise NotFoundError("Группа не найдена")
     return GroupDetail.model_validate(group)
