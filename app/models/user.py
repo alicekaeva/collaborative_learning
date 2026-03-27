@@ -49,12 +49,13 @@ class User(IDMixin, Base):
         "Message", back_populates="receiver", foreign_keys="Message.receiver_id", lazy="noload"
     )
 
+    # noload by default — explicitly loaded via selectinload() in queries that need profiles
     student_profile: Mapped[Optional["Student"]] = relationship(
-        "Student", back_populates="user", uselist=False, lazy="selectin", cascade="all, delete-orphan"
+        "Student", back_populates="user", uselist=False, lazy="noload", cascade="all, delete-orphan"
     )
     teacher_profile: Mapped[Optional["Teacher"]] = relationship(
-        "Teacher", back_populates="user", uselist=False, lazy="selectin", cascade="all, delete-orphan"
+        "Teacher", back_populates="user", uselist=False, lazy="noload", cascade="all, delete-orphan"
     )
     admin_profile: Mapped[Optional["Admin"]] = relationship(
-        "Admin", back_populates="user", uselist=False, lazy="selectin", cascade="all, delete-orphan"
+        "Admin", back_populates="user", uselist=False, lazy="noload", cascade="all, delete-orphan"
     )

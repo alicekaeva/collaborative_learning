@@ -1,5 +1,5 @@
-from typing import Optional, List
-from pydantic import BaseModel
+from typing import Any, Optional, List
+from pydantic import BaseModel, model_validator
 from app.schemas.tag import TagRead
 from app.schemas.user import UserShort
 
@@ -34,6 +34,27 @@ class GroupRead(GroupBase):
 class GroupDetail(GroupRead):
     teachers: List[UserShort] = []
     students: List[UserShort] = []
+
+    @model_validator(mode="before")
+    @classmethod
+    def extract_members(cls, data: Any) -> Any:
+        """
+        Handles ORM objects with teacher/student profiles.
+        Extracts User from each profile so Pydantic sees List[User] for teachers/students.
+        """
+        if not hasattr(data, "teachers"):
+            return data
+        return {
+            "id": data.id,
+            "name": data.name,
+            "info": data.info,
+            "required_teachers": data.required_teachers,
+            "required_students": data.required_students,
+            "administrator_id": data.administrator_id,
+            "tags": list(data.tags),
+            "teachers": [t.user for t in data.teachers if t.user],
+            "students": [s.user for s in data.students if s.user],
+        }
 
 
 class AddUserToGroupRequest(BaseModel):

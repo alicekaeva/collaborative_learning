@@ -30,20 +30,30 @@ async def get_by_author(db: AsyncSession, author_id: int) -> List[Post]:
     return list(result.scalars().all())
 
 
-async def get_by_tag(db: AsyncSession, tag_id: int) -> List[Post]:
+async def get_by_tag(
+    db: AsyncSession, tag_id: int, skip: int = 0, limit: int = 50
+) -> List[Post]:
     result = await db.execute(
         select(Post)
         .where(Post.tags.any(Tag.id == tag_id))
+        .distinct()
         .order_by(desc(Post.posting_date))
+        .offset(skip)
+        .limit(limit)
     )
     return list(result.scalars().all())
 
 
-async def get_by_category(db: AsyncSession, category_id: int) -> List[Post]:
+async def get_by_category(
+    db: AsyncSession, category_id: int, skip: int = 0, limit: int = 50
+) -> List[Post]:
     result = await db.execute(
         select(Post)
         .where(Post.tags.any(Tag.category_id == category_id))
+        .distinct()
         .order_by(desc(Post.posting_date))
+        .offset(skip)
+        .limit(limit)
     )
     return list(result.scalars().all())
 
@@ -54,6 +64,7 @@ async def get_recommended(db: AsyncSession, tag_ids: List[int]) -> List[Post]:
     result = await db.execute(
         select(Post)
         .where(Post.tags.any(Tag.id.in_(tag_ids)))
+        .distinct()
         .order_by(desc(Post.posting_date))
         .limit(50)
     )

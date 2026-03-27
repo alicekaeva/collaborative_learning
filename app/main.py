@@ -13,7 +13,7 @@ from app.core.exceptions import RedirectException
 from app.core.limiter import limiter
 from app.api.v1.router import api_router
 from app.web.router import web_router
-from app.services.cache import close_redis
+from app.services.cache import get_redis, close_redis
 
 # Ensure upload directories exist before FastAPI mounts static files
 _uploads_root = Path(settings.UPLOAD_DIR).parent
@@ -23,6 +23,7 @@ Path(settings.UPLOAD_DIR).mkdir(parents=True, exist_ok=True)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    await get_redis()  # eager init — connection errors surface at startup, not mid-request
     yield
     await close_redis()
 
