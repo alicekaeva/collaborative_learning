@@ -13,7 +13,7 @@ logs:
 	docker compose logs -f api
 
 seed:
-	docker compose exec -T postgres psql -U cluser -d collaborative_learning -f /init/seed.sql
+	docker compose exec -T postgres psql -U $${POSTGRES_USER:-cluser} -d $${POSTGRES_DB:-collaborative_learning} -f /init/seed.sql
 
 migrate:
 	docker compose exec api alembic upgrade head
