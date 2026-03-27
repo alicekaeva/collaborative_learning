@@ -1,34 +1,67 @@
-version: '3.8'
-
 services:
-  nginx-unit:
-    image: alicekaeva/collaborative_learning:latest
-    platform: linux/amd64
-    restart: always
+  api:
     build:
       context: .
-      target: stateless
-      args:
-        APP_ENV: prod
-    environment:
-      APP_ENV: prod
-      DATABASE_URL: "mysql://user:password@mysql:3306/collaborative_learning?serverVersion=8.0.31&charset=utf8mb4"
+      dockerfile: Dockerfile
+    container_name: cl_api
     ports:
-      - "127.0.0.1:9999:8080"
-
-  mysql:
-    image: mysql:8.0.31
-    command: --default-authentication-plugin=mysql_native_password
-    restart: always
-    environment:
-      MYSQL_DATABASE: "collaborative_learning"
-      MYSQL_USER: "user"
-      MYSQL_PASSWORD: "password"
-      MYSQL_ROOT_PASSWORD: "password"
+      - "8000:8000"
+    env_file:
+      - .env
     volumes:
-      - mysql-data:/var/lib/mysql:delegated
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: cl_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cluser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-clpassword}
+      POSTGRES_DB: ${POSTGRES_DB:-collaborative_learning}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init:/init:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-cluser} -d ${POSTGRES_DB:-collaborative_learning}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: cl_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redispassword}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redispassword}", "--no-auth-warning", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - app_network
 
 volumes:
-  ###> doctrine/doctrine-bundle ###
-  mysql-data:
-  ###< doctrine/doctrine-bundle ###
+  postgres_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  app_network:
+    driver: bridge

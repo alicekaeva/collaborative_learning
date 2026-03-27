@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Обучение — Совместное обучение{% endblock %}
+
+{% block body %}
+<div class="flex flex-col gap-4">
+
+  <!-- Page header -->
+  <div>
+    <h1 class="text-2xl font-bold text-base-content">
+      <i class="fa-solid fa-graduation-cap text-primary mr-2"></i>Моё обучение
+    </h1>
+    <p class="text-base-content/60 text-sm mt-1">Группы, в которых вы участвуете</p>
+  </div>
+
+  {% if groups %}
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {% for group in groups %}
+        <div class="card bg-base-100 shadow hover:shadow-md transition-shadow">
+          <div class="card-body p-5">
+            <div class="flex items-start justify-between gap-2">
+              <h2 class="card-title text-base font-bold line-clamp-1">
+                {{ group.name }}
+              </h2>
+              <!-- Role badge: derive from user profiles -->
+              {% if user and user.admin_profile and group.administrator_id == user.admin_profile.id %}
+              <span class="badge badge-primary badge-sm flex-shrink-0">Администратор</span>
+              {% elif user and user.teacher_profile %}
+              <span class="badge badge-info badge-sm flex-shrink-0">Преподаватель</span>
+              {% else %}
+              <span class="badge badge-success badge-sm flex-shrink-0">Студент</span>
+              {% endif %}
+            </div>
+
+            {% if group.info %}
+            <p class="text-sm text-base-content/70 line-clamp-2 mt-1">{{ group.info }}</p>
+            {% endif %}
+
+            <!-- Stats -->
+            <div class="flex gap-3 mt-2 text-xs text-base-content/60">
+              <span class="flex items-center gap-1">
+                <i class="fa-solid fa-chalkboard-user text-info"></i>
+                {{ group.teachers | length }} препод.
+              </span>
+              <span class="flex items-center gap-1">
+                <i class="fa-solid fa-user-graduate text-success"></i>
+                {{ group.students | length }} студ.
+              </span>
+            </div>
+
+            <!-- Tags -->
+            {% if group.tags %}
+            <div class="flex flex-wrap gap-1 mt-2">
+              {% for tag in group.tags %}
+              <span class="badge badge-outline badge-xs">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="card-actions justify-end mt-3">
+              <a href="/learning/groups/{{ group.id }}" class="btn btn-primary btn-sm gap-1">
+                <i class="fa-solid fa-door-open"></i> Войти
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card bg-base-100 shadow">
+      <div class="card-body items-center text-center py-16">
+        <i class="fa-solid fa-graduation-cap text-5xl text-base-content/20 mb-4"></i>
+        <h3 class="text-lg font-semibold text-base-content/60">Вы ещё не состоите ни в одной группе</h3>
+        <p class="text-base-content/40 text-sm max-w-sm">
+          Найдите интересующую группу и запишитесь.
+        </p>
+        <div class="flex gap-2 mt-4">
+          <a href="/groups" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-users mr-1"></i> Найти группу
+          </a>
+          <a href="/groups/recommended" class="btn btn-outline btn-sm">
+            <i class="fa-solid fa-star mr-1"></i> Рекомендованные
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Новое объявление — Совместное обучение{% endblock %}
+
+{% block body %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6 flex items-center gap-3">
+    <a href="/" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-plus text-primary mr-2"></i>Новое объявление
+      </h1>
+      <p class="text-base-content/60 text-sm">Поделитесь информацией с участниками платформы</p>
+    </div>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-error mb-4">
+    <i class="fa-solid fa-circle-exclamation"></i>
+    <span>{{ error }}</span>
+  </div>
+  {% endif %}
+
+  <div class="card bg-base-100 shadow-lg">
+    <div class="card-body p-6">
+      <form action="/posts/new" method="POST" class="space-y-5">
+
+        <!-- Content field -->
+        <div class="form-control">
+          <label class="label" for="content">
+            <span class="label-text font-medium">Текст объявления</span>
+            <span class="label-text-alt text-base-content/50">Максимум 500 символов</span>
+          </label>
+          <textarea
+            id="content"
+            name="content"
+            class="textarea textarea-bordered w-full min-h-32 leading-relaxed resize-y"
+            placeholder="Введите текст объявления..."
+            maxlength="500"
+            required
+          ></textarea>
+          <label class="label">
+            <span class="label-text-alt text-base-content/50" id="char-count">0 / 500</span>
+          </label>
+        </div>
+
+        <!-- Tags field -->
+        {% if tags %}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-medium">Теги</span>
+            <span class="label-text-alt text-base-content/50">Выберите подходящие теги</span>
+          </label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 p-3 border border-base-300 rounded-lg bg-base-200/50">
+            {% for tag in tags %}
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-base-200 rounded p-1 transition-colors">
+              <input type="checkbox" name="tag_ids" value="{{ tag.id }}" class="checkbox checkbox-primary checkbox-sm"/>
+              <span class="text-sm">{{ tag.name }}</span>
+              {% if tag.category %}
+              <span class="badge badge-ghost badge-xs ml-auto">{{ tag.category.name }}</span>
+              {% endif %}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Submit -->
+        <div class="flex gap-3 pt-2">
+          <button type="submit" class="btn btn-primary flex-1">
+            <i class="fa-solid fa-paper-plane mr-2"></i> Опубликовать
+          </button>
+          <a href="/" class="btn btn-ghost">Отмена</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  var textarea = document.getElementById('content');
+  var counter = document.getElementById('char-count');
+  function updateCount() {
+    var len = textarea.value.length;
+    counter.textContent = len + ' / 500';
+    counter.className = 'label-text-alt ' + (len > 450 ? 'text-warning' : len >= 500 ? 'text-error' : 'text-base-content/50');
+  }
+  textarea.addEventListener('input', updateCount);
+</script>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Рекомендованные группы — Совместное обучение{% endblock %}
+
+{% block body %}
+<div class="flex flex-col gap-4">
+
+  <!-- Page header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div>
+      <h1 class="text-2xl font-bold text-base-content">
+        <i class="fa-solid fa-star text-primary mr-2"></i>Рекомендованные группы
+      </h1>
+      <p class="text-base-content/60 text-sm mt-1">Подобрано на основе ваших интересов</p>
+    </div>
+    {% if user and user.admin_profile %}
+    <a href="/groups/new" class="btn btn-primary gap-2 self-start sm:self-auto">
+      <i class="fa-solid fa-plus"></i> Создать группу
+    </a>
+    {% endif %}
+  </div>
+
+  <!-- Tabs -->
+  <div role="tablist" class="tabs tabs-boxed w-fit bg-base-100 shadow">
+    <a href="/groups" role="tab" class="tab">Все</a>
+    <a href="/groups/recommended" role="tab" class="tab tab-active">
+      <i class="fa-solid fa-star mr-1"></i> Рекомендованные
+    </a>
+    <a href="/learning" role="tab" class="tab">
+      <i class="fa-solid fa-graduation-cap mr-1"></i> Мои группы
+    </a>
+  </div>
+
+  {% if groups %}
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      {% for group in groups %}
+      <div class="card bg-base-100 shadow hover:shadow-md transition-shadow">
+        <div class="card-body p-5">
+          <h2 class="card-title text-base font-bold">
+            <i class="fa-solid fa-users text-primary mr-1"></i>
+            {{ group.name }}
+          </h2>
+          {% if group.info %}
+          <p class="text-sm text-base-content/70 line-clamp-2">{{ group.info }}</p>
+          {% endif %}
+
+          <div class="flex gap-3 mt-2 text-xs text-base-content/60">
+            <span class="flex items-center gap-1">
+              <i class="fa-solid fa-chalkboard-user text-info"></i>
+              <span>{{ group.teachers | length }} / {{ group.required_teachers }} препод.</span>
+            </span>
+            <span class="flex items-center gap-1">
+              <i class="fa-solid fa-user-graduate text-success"></i>
+              <span>{{ group.students | length }} / {{ group.required_students }} студ.</span>
+            </span>
+          </div>
+
+          {% if group.tags %}
+          <div class="flex flex-wrap gap-1 mt-2">
+            {% for tag in group.tags %}
+            <span class="badge badge-primary badge-outline badge-xs">{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="card-actions justify-end mt-3">
+            <a href="/groups/{{ group.id }}" class="btn btn-primary btn-sm">
+              Подробнее <i class="fa-solid fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card bg-base-100 shadow">
+      <div class="card-body items-center text-center py-16">
+        <i class="fa-solid fa-star text-5xl text-base-content/20 mb-4"></i>
+        <h3 class="text-lg font-semibold text-base-content/60">Нет рекомендаций</h3>
+        <p class="text-base-content/40 text-sm max-w-sm">
+          Добавьте теги в профиле, чтобы получать персонализированные рекомендации групп.
+        </p>
+        <a href="/users/{{ user.id }}/edit" class="btn btn-primary btn-sm mt-4">
+          <i class="fa-solid fa-tags mr-1"></i> Настроить теги
+        </a>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

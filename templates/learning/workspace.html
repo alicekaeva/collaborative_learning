@@ -1,0 +1,561 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }} — Рабочее пространство{% endblock %}
+
+{% block extra_head %}
+<style>
+  #group-chat-area { scroll-behavior: smooth; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="flex flex-col gap-4 max-w-5xl mx-auto">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3">
+    <a href="/learning" class="btn btn-ghost btn-sm btn-circle">
+      <i class="fa-solid fa-arrow-left"></i>
+    </a>
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-3 flex-wrap">
+        <h1 class="text-2xl font-bold text-base-content">{{ group.name }}</h1>
+        <span class="badge badge-sm
+          {% if user_role == 'admin' %}badge-primary
+          {% elif user_role == 'teacher' %}badge-info
+          {% else %}badge-success{% endif %}">
+          {% if user_role == 'admin' %}Администратор
+          {% elif user_role == 'teacher' %}Преподаватель
+          {% else %}Студент{% endif %}
+        </span>
+      </div>
+      {% if group.info %}
+      <p class="text-sm text-base-content/60 mt-0.5 truncate">{{ group.info }}</p>
+      {% endif %}
+    </div>
+    <div class="flex gap-2 flex-shrink-0">
+      <a href="/groups/{{ group.id }}" class="btn btn-ghost btn-sm gap-1" title="Страница группы">
+        <i class="fa-solid fa-eye"></i>
+        <span class="hidden sm:inline">Группа</span>
+      </a>
+      {% if user_role == 'admin' %}
+      <a href="/groups/{{ group.id }}/management" class="btn btn-ghost btn-sm gap-1" title="Управление">
+        <i class="fa-solid fa-gear"></i>
+        <span class="hidden sm:inline">Управление</span>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Tabs navigation -->
+  <div class="bg-base-100 rounded-xl shadow overflow-hidden">
+    <div class="flex border-b border-base-200 overflow-x-auto">
+      <button onclick="switchTab('chat')" id="tab-btn-chat"
+              class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-base-200 transition-colors whitespace-nowrap tab-active-btn">
+        <i class="fa-solid fa-comments text-primary"></i> Чат
+      </button>
+      <button onclick="switchTab('goals')" id="tab-btn-goals"
+              class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-base-200 transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-bullseye text-success"></i> Цели
+        {% if goals %}<span class="badge badge-success badge-xs">{{ goals | length }}</span>{% endif %}
+      </button>
+      <button onclick="switchTab('tasks')" id="tab-btn-tasks"
+              class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-base-200 transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-list-check text-warning"></i> Задания
+        {% if tasks %}<span class="badge badge-warning badge-xs">{{ tasks | length }}</span>{% endif %}
+      </button>
+      <button onclick="switchTab('meetings')" id="tab-btn-meetings"
+              class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-base-200 transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-calendar text-info"></i> Встречи
+        {% if meetings %}<span class="badge badge-info badge-xs">{{ meetings | length }}</span>{% endif %}
+      </button>
+      <button onclick="switchTab('materials')" id="tab-btn-materials"
+              class="tab-btn flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent hover:bg-base-200 transition-colors whitespace-nowrap">
+        <i class="fa-solid fa-file-lines text-secondary"></i> Материалы
+        {% if materials %}<span class="badge badge-secondary badge-xs">{{ materials | length }}</span>{% endif %}
+      </button>
+    </div>
+
+    <!-- ==================== CHAT TAB ==================== -->
+    <div id="tab-chat" class="tab-panel active">
+      <div class="flex flex-col" style="height: 520px;">
+        <!-- Messages area -->
+        <div id="group-chat-area" class="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2">
+          {% if chat_messages %}
+            {% for msg in chat_messages %}
+              {% set is_mine = msg.sender_id == user.id %}
+              <div class="chat {% if is_mine %}chat-end{% else %}chat-start{% endif %}">
+                <div class="chat-image avatar placeholder">
+                  <div class="bg-{% if is_mine %}primary{% else %}neutral{% endif %}/20 text-{% if is_mine %}primary{% else %}neutral-content{% endif %} rounded-full w-8 flex items-center justify-center">
+                    <span class="text-xs font-bold">
+                      {% if msg.sender %}{{ msg.sender.full_name[0] | upper }}{% else %}?{% endif %}
+                    </span>
+                  </div>
+                </div>
+                <div class="chat-header text-xs text-base-content/50 mb-0.5">
+                  {% if not is_mine %}
+                    {{ msg.sender.full_name if msg.sender else 'Неизвестный' }}
+                  {% endif %}
+                  {% if msg.sending_date %}
+                    <time class="ml-1">{{ msg.sending_date.strftime('%d.%m %H:%M') }}</time>
+                  {% endif %}
+                  {% if msg.is_pinned %}
+                    <i class="fa-solid fa-thumbtack text-warning ml-1 text-xs"></i>
+                  {% endif %}
+                </div>
+                <div class="chat-bubble {% if is_mine %}chat-bubble-primary{% else %}{% endif %} max-w-xs sm:max-w-sm break-words">
+                  {{ msg.content }}
+                </div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="flex-1 flex items-center justify-center h-full">
+              <div class="text-center">
+                <i class="fa-regular fa-comments text-5xl text-base-content/20 mb-3"></i>
+                <p class="text-base-content/40 text-sm">Начните общение в группе</p>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Chat input -->
+        <div class="border-t border-base-200 p-3">
+          <form action="/learning/groups/{{ group.id }}/chat" method="POST" class="flex gap-2 items-end">
+            <div class="form-control flex-1">
+              <textarea
+                name="content"
+                class="textarea textarea-bordered resize-none text-sm leading-relaxed"
+                placeholder="Написать в чат группы..."
+                required
+                rows="2"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();this.form.submit();}"
+              ></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm flex-shrink-0">
+              <i class="fa-solid fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== GOALS TAB ==================== -->
+    <div id="tab-goals" class="tab-panel p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-base flex items-center gap-2">
+          <i class="fa-solid fa-bullseye text-success"></i> Цели группы
+        </h2>
+        {% if user_role in ('admin', 'teacher') %}
+        <button onclick="toggleForm('add-goal-form')" class="btn btn-success btn-sm gap-1">
+          <i class="fa-solid fa-plus"></i> Добавить цель
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Add goal form (hidden by default) -->
+      {% if user_role in ('admin', 'teacher') %}
+      <div id="add-goal-form" class="card bg-base-200/50 border border-success/30 mb-4 hidden">
+        <div class="card-body p-4">
+          <h3 class="font-semibold text-sm mb-3">Новая цель</h3>
+          <form action="/learning/groups/{{ group.id }}/goals/new" method="POST" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="form-control sm:col-span-2">
+                <label class="label py-1"><span class="label-text text-sm">Название <span class="text-error">*</span></span></label>
+                <input type="text" name="name" class="input input-bordered input-sm w-full" placeholder="Название цели" required maxlength="255"/>
+              </div>
+              <div class="form-control">
+                <label class="label py-1"><span class="label-text text-sm">Баллы</span></label>
+                <input type="number" name="points" class="input input-bordered input-sm w-full" value="0" min="0"/>
+              </div>
+              <div class="form-control">
+                <label class="label py-1"><span class="label-text text-sm">Дедлайн</span></label>
+                <input type="date" name="deadline" class="input input-bordered input-sm w-full"/>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="btn btn-success btn-sm">Добавить</button>
+              <button type="button" onclick="toggleForm('add-goal-form')" class="btn btn-ghost btn-sm">Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if goals %}
+        <div class="space-y-2">
+          {% for goal in goals %}
+          <div class="card bg-base-100 border border-base-200 hover:border-success/30 transition-colors">
+            <div class="card-body p-4">
+              <div class="flex items-start gap-3">
+                <!-- Completion indicator -->
+                <div class="flex-shrink-0 mt-0.5">
+                  {% if goal.completed %}
+                  <div class="w-5 h-5 rounded-full bg-success flex items-center justify-center">
+                    <i class="fa-solid fa-check text-white text-xs"></i>
+                  </div>
+                  {% else %}
+                  <div class="w-5 h-5 rounded-full border-2 border-base-300"></div>
+                  {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-start justify-between gap-2">
+                    <p class="font-medium text-sm {% if goal.completed %}line-through text-base-content/50{% endif %}">
+                      {{ goal.name }}
+                    </p>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                      <!-- Points badge -->
+                      {% if goal.points %}
+                      <span class="badge badge-warning badge-sm gap-1">
+                        <i class="fa-solid fa-star fa-xs"></i> {{ goal.points }}
+                      </span>
+                      {% endif %}
+                      <!-- Deadline -->
+                      {% if goal.deadline %}
+                      <span class="badge badge-ghost badge-sm gap-1">
+                        <i class="fa-solid fa-calendar fa-xs"></i>
+                        {{ goal.deadline.strftime('%d.%m.%Y') }}
+                      </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+                <!-- Actions for teacher/admin -->
+                {% if user_role in ('admin', 'teacher') %}
+                <div class="flex gap-1 flex-shrink-0">
+                  {% if goal.completed %}
+                  <form action="/learning/groups/{{ group.id }}/goals/{{ goal.id }}/uncomplete" method="POST">
+                    <button type="submit" class="btn btn-ghost btn-xs text-base-content/40 hover:text-warning" title="Снять отметку">
+                      <i class="fa-solid fa-rotate-left fa-xs"></i>
+                    </button>
+                  </form>
+                  {% else %}
+                  <form action="/learning/groups/{{ group.id }}/goals/{{ goal.id }}/complete" method="POST">
+                    <button type="submit" class="btn btn-ghost btn-xs text-base-content/40 hover:text-success" title="Отметить выполненной">
+                      <i class="fa-solid fa-check fa-xs"></i>
+                    </button>
+                  </form>
+                  {% endif %}
+                  <form action="/learning/groups/{{ group.id }}/goals/{{ goal.id }}/delete" method="POST"
+                        onsubmit="return confirm('Удалить цель?')">
+                    <button type="submit" class="btn btn-ghost btn-xs text-base-content/40 hover:text-error" title="Удалить">
+                      <i class="fa-solid fa-trash fa-xs"></i>
+                    </button>
+                  </form>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-10">
+          <i class="fa-solid fa-bullseye text-4xl text-base-content/20 mb-3"></i>
+          <p class="text-base-content/50 text-sm">Целей пока нет</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ==================== TASKS TAB ==================== -->
+    <div id="tab-tasks" class="tab-panel p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-base flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-warning"></i> Задания
+        </h2>
+        {% if user_role in ('admin', 'teacher') %}
+        <button onclick="toggleForm('add-task-form')" class="btn btn-warning btn-sm gap-1">
+          <i class="fa-solid fa-plus"></i> Добавить задание
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Add task form -->
+      {% if user_role in ('admin', 'teacher') %}
+      <div id="add-task-form" class="card bg-base-200/50 border border-warning/30 mb-4 hidden">
+        <div class="card-body p-4">
+          <h3 class="font-semibold text-sm mb-3">Новое задание</h3>
+          <form action="/learning/groups/{{ group.id }}/tasks/new" method="POST" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="form-control sm:col-span-2">
+                <label class="label py-1"><span class="label-text text-sm">Название <span class="text-error">*</span></span></label>
+                <input type="text" name="name" class="input input-bordered input-sm w-full" placeholder="Название задания" required maxlength="255"/>
+              </div>
+              <div class="form-control">
+                <label class="label py-1"><span class="label-text text-sm">Баллы</span></label>
+                <input type="number" name="points" class="input input-bordered input-sm w-full" value="0" min="0"/>
+              </div>
+              <div class="form-control">
+                <label class="label py-1"><span class="label-text text-sm">Дедлайн</span></label>
+                <input type="date" name="deadline" class="input input-bordered input-sm w-full"/>
+              </div>
+              <div class="form-control sm:col-span-2">
+                <label class="label py-1"><span class="label-text text-sm">Ссылка</span></label>
+                <input type="url" name="link" class="input input-bordered input-sm w-full" placeholder="https://..."/>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="btn btn-warning btn-sm">Добавить</button>
+              <button type="button" onclick="toggleForm('add-task-form')" class="btn btn-ghost btn-sm">Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if tasks %}
+        <div class="space-y-2">
+          {% for task in tasks %}
+          <div class="card bg-base-100 border border-base-200 hover:border-warning/30 transition-colors">
+            <div class="card-body p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <p class="font-medium text-sm">{{ task.name }}</p>
+                    {% if task.points %}
+                    <span class="badge badge-warning badge-sm gap-1">
+                      <i class="fa-solid fa-star fa-xs"></i> {{ task.points }} б.
+                    </span>
+                    {% endif %}
+                  </div>
+                  <div class="flex items-center gap-3 mt-1 flex-wrap">
+                    {% if task.deadline %}
+                    <span class="text-xs text-base-content/50 flex items-center gap-1">
+                      <i class="fa-solid fa-calendar"></i>
+                      Дедлайн: {{ task.deadline.strftime('%d.%m.%Y') }}
+                    </span>
+                    {% endif %}
+                    {% if task.link %}
+                    <a href="{{ task.link }}" target="_blank" class="text-xs text-primary hover:underline flex items-center gap-1">
+                      <i class="fa-solid fa-link"></i> Ссылка
+                    </a>
+                    {% endif %}
+                  </div>
+                </div>
+                {% if user_role in ('admin', 'teacher') %}
+                <form action="/learning/groups/{{ group.id }}/tasks/{{ task.id }}/delete" method="POST"
+                      onsubmit="return confirm('Удалить задание?')">
+                  <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить">
+                    <i class="fa-solid fa-trash fa-xs"></i>
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-10">
+          <i class="fa-solid fa-list-check text-4xl text-base-content/20 mb-3"></i>
+          <p class="text-base-content/50 text-sm">Заданий пока нет</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ==================== MEETINGS TAB ==================== -->
+    <div id="tab-meetings" class="tab-panel p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-base flex items-center gap-2">
+          <i class="fa-solid fa-calendar text-info"></i> Встречи
+        </h2>
+        {% if user_role in ('admin', 'teacher') %}
+        <button onclick="toggleForm('add-meeting-form')" class="btn btn-info btn-sm gap-1">
+          <i class="fa-solid fa-plus"></i> Добавить встречу
+        </button>
+        {% endif %}
+      </div>
+
+      <!-- Add meeting form -->
+      {% if user_role in ('admin', 'teacher') %}
+      <div id="add-meeting-form" class="card bg-base-200/50 border border-info/30 mb-4 hidden">
+        <div class="card-body p-4">
+          <h3 class="font-semibold text-sm mb-3">Новая встреча</h3>
+          <form action="/learning/groups/{{ group.id }}/meetings/new" method="POST" class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="form-control sm:col-span-2">
+                <label class="label py-1"><span class="label-text text-sm">Название <span class="text-error">*</span></span></label>
+                <input type="text" name="name" class="input input-bordered input-sm w-full" placeholder="Название встречи" required maxlength="255"/>
+              </div>
+              <div class="form-control">
+                <label class="label py-1"><span class="label-text text-sm">Дата и время</span></label>
+                <input type="datetime-local" name="held_on" class="input input-bordered input-sm w-full"/>
+              </div>
+              <div class="form-control">
+                <label class="label py-1"><span class="label-text text-sm">Ссылка (Zoom, Meet...)</span></label>
+                <input type="url" name="link" class="input input-bordered input-sm w-full" placeholder="https://zoom.us/j/..."/>
+              </div>
+              <div class="form-control sm:col-span-2">
+                <label class="label py-1"><span class="label-text text-sm">Повестка</span></label>
+                <textarea name="agenda" class="textarea textarea-bordered textarea-sm w-full resize-none" rows="2" placeholder="Темы, вопросы..."></textarea>
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button type="submit" class="btn btn-info btn-sm">Добавить</button>
+              <button type="button" onclick="toggleForm('add-meeting-form')" class="btn btn-ghost btn-sm">Отмена</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if meetings %}
+        <div class="space-y-2">
+          {% for meeting in meetings %}
+          <div class="card bg-base-100 border border-base-200 hover:border-info/30 transition-colors">
+            <div class="card-body p-4">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-sm">{{ meeting.name }}</p>
+                  <div class="flex items-center gap-3 mt-1 flex-wrap">
+                    {% if meeting.held_on %}
+                    <span class="text-xs text-base-content/50 flex items-center gap-1">
+                      <i class="fa-solid fa-calendar-day text-info"></i>
+                      {{ meeting.held_on.strftime('%d.%m.%Y %H:%M') }}
+                    </span>
+                    {% endif %}
+                    {% if meeting.link %}
+                    <a href="{{ meeting.link }}" target="_blank" class="text-xs text-primary hover:underline flex items-center gap-1">
+                      <i class="fa-solid fa-video"></i> Ссылка на встречу
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% if meeting.agenda %}
+                  <p class="text-xs text-base-content/60 mt-1 line-clamp-2">{{ meeting.agenda }}</p>
+                  {% endif %}
+                </div>
+                {% if user_role in ('admin', 'teacher') %}
+                <form action="/learning/groups/{{ group.id }}/meetings/{{ meeting.id }}/delete" method="POST"
+                      onsubmit="return confirm('Удалить встречу?')">
+                  <button type="submit" class="btn btn-ghost btn-xs btn-circle text-error" title="Удалить">
+                    <i class="fa-solid fa-trash fa-xs"></i>
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-10">
+          <i class="fa-solid fa-calendar text-4xl text-base-content/20 mb-3"></i>
+          <p class="text-base-content/50 text-sm">Встреч пока нет</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ==================== MATERIALS TAB ==================== -->
+    <div id="tab-materials" class="tab-panel p-5">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="font-semibold text-base flex items-center gap-2">
+          <i class="fa-solid fa-file-lines text-secondary"></i> Материалы группы
+        </h2>
+        {% if user_role in ('admin', 'teacher') %}
+        <a href="/materials/new" class="btn btn-secondary btn-sm gap-1">
+          <i class="fa-solid fa-upload"></i> Загрузить
+        </a>
+        {% endif %}
+      </div>
+
+      {% if materials %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {% for material in materials %}
+          <div class="card bg-base-100 border border-base-200 hover:border-secondary/30 transition-colors">
+            <div class="card-body p-3">
+              <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                  {% if 'image' in material.mime_type %}
+                    <i class="fa-solid fa-image text-success text-lg"></i>
+                  {% elif 'pdf' in material.mime_type %}
+                    <i class="fa-solid fa-file-pdf text-error text-lg"></i>
+                  {% elif 'video' in material.mime_type %}
+                    <i class="fa-solid fa-file-video text-info text-lg"></i>
+                  {% else %}
+                    <i class="fa-solid fa-file text-base-content/60 text-lg"></i>
+                  {% endif %}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="font-medium text-sm truncate">{{ material.name }}</p>
+                  <p class="text-xs text-base-content/50">{{ material.mime_type }}</p>
+                </div>
+                <a href="{{ material.file_link }}" target="_blank" download
+                   class="btn btn-ghost btn-xs btn-circle text-primary flex-shrink-0" title="Скачать">
+                  <i class="fa-solid fa-download"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-10">
+          <i class="fa-solid fa-folder-open text-4xl text-base-content/20 mb-3"></i>
+          <p class="text-base-content/50 text-sm">Материалов пока нет</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div><!-- end bg-base-100 card -->
+
+</div>
+
+<script>
+  var activeTab = 'chat';
+
+  function switchTab(tabName) {
+    // Hide all panels
+    document.querySelectorAll('.tab-panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    // Remove active from all buttons
+    document.querySelectorAll('.tab-btn').forEach(function(b) {
+      b.classList.remove('tab-active-btn', 'border-primary', 'text-primary');
+      b.classList.add('border-transparent');
+    });
+    // Show selected
+    var panel = document.getElementById('tab-' + tabName);
+    if (panel) panel.classList.add('active');
+    var btn = document.getElementById('tab-btn-' + tabName);
+    if (btn) {
+      btn.classList.add('tab-active-btn', 'border-primary', 'text-primary');
+      btn.classList.remove('border-transparent');
+    }
+    activeTab = tabName;
+
+    // Scroll chat to bottom when switching to chat
+    if (tabName === 'chat') {
+      setTimeout(function() {
+        var ca = document.getElementById('group-chat-area');
+        if (ca) ca.scrollTop = ca.scrollHeight;
+      }, 50);
+    }
+  }
+
+  function toggleForm(id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('hidden');
+  }
+
+  // Initial state: activate chat tab button
+  (function() {
+    var btn = document.getElementById('tab-btn-chat');
+    if (btn) {
+      btn.classList.add('border-primary', 'text-primary');
+      btn.classList.remove('border-transparent');
+    }
+    // Scroll chat
+    var ca = document.getElementById('group-chat-area');
+    if (ca) ca.scrollTop = ca.scrollHeight;
+  })();
+
+  // Check URL hash for initial tab
+  (function() {
+    var hash = window.location.hash.replace('#', '');
+    var validTabs = ['chat', 'goals', 'tasks', 'meetings', 'materials'];
+    if (hash && validTabs.indexOf(hash) >= 0) {
+      switchTab(hash);
+    }
+  })();
+</script>
+{% endblock %}
