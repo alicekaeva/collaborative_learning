@@ -69,7 +69,9 @@ class TestIsDangerousContent:
 
 class TestSaveMaterial:
     async def test_unsupported_mime_type_raises(self):
-        upload = _make_upload(b"content", content_type="application/x-executable")
+        # Binary blob that filetype can't recognise and isn't valid UTF-8
+        unknown_bytes = b"\x00\x01\x02\x03\xfe\xff\xde\xad\xbe\xef"
+        upload = _make_upload(unknown_bytes, content_type="application/octet-stream")
         with pytest.raises(BadRequestError, match="не поддерживается"):
             await save_material(upload)
 
@@ -84,13 +86,17 @@ class TestSaveMaterial:
             await save_material(upload)
 
     async def test_elf_binary_disguised_as_pdf_raises(self):
-        """Клиент лжёт о MIME — ELF-бинарник замаскирован под PDF."""
+        """Клиент лжёт о MIME — ELF-бинарник замаскирован под PDF.
+
+        Раньше ELF ловился на проверке magic bytes; теперь он отклоняется
+        ещё раньше — на этапе определения MIME по байтам файла.
+        """
         upload = _make_upload(
             b"\x7fELF\x02\x01\x01" + b"\x00" * 100,
             content_type="application/pdf",
             filename="doc.pdf",
         )
-        with pytest.raises(BadRequestError, match="Содержимое файла"):
+        with pytest.raises(BadRequestError):
             await save_material(upload)
 
     async def test_valid_pdf_saves_successfully(self, tmp_path):

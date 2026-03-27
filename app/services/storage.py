@@ -1,6 +1,7 @@
 import asyncio
 import uuid
 import aiofiles
+import filetype
 from pathlib import Path
 from slugify import slugify
 from fastapi import UploadFile
@@ -47,18 +48,37 @@ def _is_dangerous_content(data: bytes) -> bool:
     return any(head.startswith(sig.lower()) for sig in _DANGEROUS_SIGNATURES)
 
 
+def _detect_mime(data: bytes) -> str | None:
+    """Detect MIME type from file bytes using magic signatures (ignores HTTP header)."""
+    kind = filetype.guess(data)
+    if kind is not None:
+        return kind.mime
+    # filetype doesn't recognise plain-text or some Office XML; fall back to a
+    # conservative check: if the bytes are valid UTF-8 and contain no NUL bytes
+    # treat them as text/plain.
+    try:
+        data[:4096].decode("utf-8")
+        if b"\x00" not in data[:4096]:
+            return "text/plain"
+    except (UnicodeDecodeError, ValueError):
+        pass
+    return None
+
+
 async def save_material(file: UploadFile) -> tuple[str, str]:
     """Save uploaded file to disk. Returns (file_link, mime_type)."""
-    if file.content_type not in ALLOWED_MIME_TYPES:
-        raise BadRequestError(f"Тип файла '{file.content_type}' не поддерживается")
-
-    # Check size
     contents = await file.read()
+
+    if len(contents) > settings.MAX_FILE_SIZE:
+        raise BadRequestError(f"Файл превышает максимально допустимый размер {settings.MAX_FILE_SIZE_MB}MB")
+
+    # Detect MIME from actual bytes — never trust the Content-Type HTTP header
+    detected_mime = _detect_mime(contents)
+    if detected_mime not in ALLOWED_MIME_TYPES:
+        raise BadRequestError(f"Тип файла не поддерживается (определён как '{detected_mime}')")
 
     if _is_dangerous_content(contents):
         raise BadRequestError("Содержимое файла не соответствует допустимому типу")
-    if len(contents) > settings.MAX_FILE_SIZE:
-        raise BadRequestError(f"Файл превышает максимально допустимый размер {settings.MAX_FILE_SIZE_MB}MB")
 
     upload_dir = Path(settings.UPLOAD_DIR)
     upload_dir.mkdir(parents=True, exist_ok=True)
@@ -71,7 +91,7 @@ async def save_material(file: UploadFile) -> tuple[str, str]:
     async with aiofiles.open(file_path, "wb") as f:
         await f.write(contents)
 
-    return f"/uploads/materials/{safe_name}", file.content_type
+    return f"/uploads/materials/{safe_name}", detected_mime
 
 
 async def delete_file(file_link: str) -> None:

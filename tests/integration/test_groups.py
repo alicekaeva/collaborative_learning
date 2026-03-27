@@ -41,7 +41,7 @@ class TestCreateGroup:
         """Пользователь с ROLE_ADMIN должен успешно создавать группы."""
         group = _make_group(id=1, name="Admin Group")
 
-        with patch("app.api.v1.endpoints.groups.group_crud.create",
+        with patch("app.modules.groups.repository.create",
                    new_callable=AsyncMock, return_value=group):
             response = await admin_client.post(GROUPS_URL, json={
                 "name": "Admin Group",
@@ -85,7 +85,7 @@ class TestCreateGroup:
 class TestListGroups:
     async def test_public_access_returns_200(self, client):
         """Просмотр списка групп не требует токена."""
-        with patch("app.api.v1.endpoints.groups.group_crud.get_all",
+        with patch("app.modules.groups.repository.get_all",
                    new_callable=AsyncMock, return_value=[]):
             response = await client.get(GROUPS_URL)
 
@@ -94,11 +94,11 @@ class TestListGroups:
 
     async def test_returns_group_list(self, client):
         groups = [_make_group(id=i, name=f"Группа {i}") for i in range(1, 4)]
-        with patch("app.api.v1.endpoints.groups.group_crud.get_all",
+        with patch("app.modules.groups.repository.get_all",
                    new_callable=AsyncMock, return_value=groups), \
-             patch("app.api.v1.endpoints.groups.group_crud.get_by_tag",
+             patch("app.modules.groups.repository.get_by_tag",
                    new_callable=AsyncMock), \
-             patch("app.api.v1.endpoints.groups.group_crud.get_by_category",
+             patch("app.modules.groups.repository.get_by_category",
                    new_callable=AsyncMock):
             response = await client.get(GROUPS_URL)
 
@@ -116,7 +116,7 @@ class TestMyGroups:
         assert response.status_code == 401
 
     async def test_authenticated_returns_200(self, auth_client):
-        with patch("app.api.v1.endpoints.groups.group_crud.get_user_groups",
+        with patch("app.modules.groups.repository.get_user_groups",
                    new_callable=AsyncMock, return_value=[]):
             response = await auth_client.get(f"{GROUPS_URL}my")
 
@@ -137,7 +137,7 @@ class TestEnroll:
 
     async def test_nonexistent_group_returns_404(self, auth_client):
         # EnrollRequest требует group_id как в теле, так и в path-параметре
-        with patch("app.api.v1.endpoints.groups.group_crud.get_by_id",
+        with patch("app.modules.groups.repository.get_by_id",
                    new_callable=AsyncMock, return_value=None):
             response = await auth_client.post(
                 f"{GROUPS_URL}999/enroll",

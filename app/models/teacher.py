@@ -1,23 +1,4 @@
-from typing import TYPE_CHECKING, List
-from sqlalchemy import Integer, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+# Backward-compatibility shim — canonical source: app.modules.identity.models.teacher
+from app.modules.identity.models.teacher import Teacher
 
-from app.models.base import Base, IDMixin
-from app.models.associations import group_teacher_table
-
-if TYPE_CHECKING:
-    from app.models.user import User
-    from app.models.group import Group
-
-
-class Teacher(IDMixin, Base):
-    __tablename__ = "teachers"
-
-    user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
-    )
-
-    user: Mapped["User"] = relationship("User", back_populates="teacher_profile", lazy="selectin")
-    groups: Mapped[List["Group"]] = relationship(
-        "Group", secondary=group_teacher_table, back_populates="teachers", lazy="selectin"
-    )
+__all__ = ["Teacher"]

@@ -17,10 +17,12 @@ class Settings(BaseSettings):
     POSTGRES_SERVER: str = "postgres"
     POSTGRES_PORT: int = 5432
     POSTGRES_USER: str = "cluser"
-    POSTGRES_PASSWORD: str = "clpassword"
+    # No default — app will fail at startup if POSTGRES_PASSWORD is missing from .env
+    POSTGRES_PASSWORD: str
     POSTGRES_DB: str = "collaborative_learning"
 
-    REDIS_URL: str = "redis://:redispassword@redis:6379/0"
+    # No default — app will fail at startup if REDIS_URL is missing from .env
+    REDIS_URL: str
 
     UPLOAD_DIR: str = "/app/uploads/materials"
     MAX_FILE_SIZE_MB: int = 50

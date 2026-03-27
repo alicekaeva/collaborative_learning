@@ -54,7 +54,7 @@ class TestUsersRequireAuth:
 
 class TestListUsers:
     async def test_authenticated_returns_200(self, auth_client, regular_user):
-        with patch("app.api.v1.endpoints.users.user_crud.get_all",
+        with patch("app.modules.identity.repository.get_all",
                    new_callable=AsyncMock, return_value=[regular_user]):
             response = await auth_client.get(USERS_URL)
 
@@ -64,7 +64,7 @@ class TestListUsers:
         assert body[0]["email"] == regular_user.email
 
     async def test_empty_list_returns_200(self, auth_client):
-        with patch("app.api.v1.endpoints.users.user_crud.get_all",
+        with patch("app.modules.identity.repository.get_all",
                    new_callable=AsyncMock, return_value=[]):
             response = await auth_client.get(USERS_URL)
 
@@ -74,7 +74,7 @@ class TestListUsers:
 
 class TestGetUser:
     async def test_existing_user_returns_200(self, auth_client, regular_user):
-        with patch("app.api.v1.endpoints.users.user_crud.get_by_id",
+        with patch("app.modules.identity.repository.get_by_id",
                    new_callable=AsyncMock, return_value=regular_user):
             response = await auth_client.get(f"{USERS_URL}{regular_user.id}")
 
@@ -82,7 +82,7 @@ class TestGetUser:
         assert response.json()["id"] == regular_user.id
 
     async def test_nonexistent_user_returns_404(self, auth_client):
-        with patch("app.api.v1.endpoints.users.user_crud.get_by_id",
+        with patch("app.modules.identity.repository.get_by_id",
                    new_callable=AsyncMock, return_value=None):
             response = await auth_client.get(f"{USERS_URL}9999")
 
@@ -96,9 +96,9 @@ class TestGetUser:
 class TestUpdateUser:
     async def test_user_can_update_own_profile(self, auth_client, regular_user):
         updated = make_user(id=regular_user.id, email="updated@example.com", full_name="Updated")
-        with patch("app.api.v1.endpoints.users.user_crud.get_by_id",
+        with patch("app.modules.identity.repository.get_by_id",
                    new_callable=AsyncMock, return_value=regular_user), \
-             patch("app.api.v1.endpoints.users.user_crud.update_user",
+             patch("app.modules.identity.repository.update_user",
                    new_callable=AsyncMock, return_value=updated):
             response = await auth_client.patch(
                 f"{USERS_URL}{regular_user.id}",
@@ -117,9 +117,9 @@ class TestUpdateUser:
 
     async def test_admin_can_update_any_profile(self, admin_client, regular_user):
         updated = make_user(id=regular_user.id, full_name="Admin-updated")
-        with patch("app.api.v1.endpoints.users.user_crud.get_by_id",
+        with patch("app.modules.identity.repository.get_by_id",
                    new_callable=AsyncMock, return_value=regular_user), \
-             patch("app.api.v1.endpoints.users.user_crud.update_user",
+             patch("app.modules.identity.repository.update_user",
                    new_callable=AsyncMock, return_value=updated):
             response = await admin_client.patch(
                 f"{USERS_URL}{regular_user.id}",

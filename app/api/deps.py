@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 from fastapi import Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy import select
@@ -10,13 +10,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.security import decode_token
 from app.core.exceptions import UnauthorizedError, ForbiddenError
 from app.db.session import get_db
-from app.models.user import User
-from app.models.student import Student
-from app.models.teacher import Teacher
-
-if TYPE_CHECKING:
-    from app.services.auth_service import AuthService
-    from app.services.group_service import GroupService
+from app.modules.identity.models.user import User
+from app.modules.identity.models.student import Student
+from app.modules.identity.models.teacher import Teacher
+from app.modules.identity.service import AuthService
+from app.modules.groups.service import GroupService
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -63,12 +61,10 @@ def require_roles(*roles: str):
 # ------------------------------------------------------------------ service deps
 
 def _get_auth_service(db: DBDep) -> AuthService:
-    from app.services.auth_service import AuthService
     return AuthService(db)
 
 
 def _get_group_service(db: DBDep) -> GroupService:
-    from app.services.group_service import GroupService
     return GroupService(db)
 
 

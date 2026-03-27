@@ -1,16 +1,4 @@
-from typing import TYPE_CHECKING, List
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+# Backward-compatibility shim — canonical source: app.modules.taxonomy.models.category
+from app.modules.taxonomy.models.category import Category
 
-from app.models.base import Base, IDMixin
-
-if TYPE_CHECKING:
-    from app.models.tag import Tag
-
-
-class Category(IDMixin, Base):
-    __tablename__ = "categories"
-
-    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
-
-    tags: Mapped[List["Tag"]] = relationship("Tag", back_populates="category", lazy="selectin")
+__all__ = ["Category"]

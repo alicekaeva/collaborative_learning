@@ -1,10 +1,4 @@
-from sqlalchemy.orm import DeclarativeBase, MappedColumn, mapped_column
-from sqlalchemy import Integer
+# Backward-compatibility shim — canonical source: app.db.base
+from app.db.base import Base, IDMixin
 
-
-class Base(DeclarativeBase):
-    pass
-
-
-class IDMixin:
-    id: MappedColumn[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+__all__ = ["Base", "IDMixin"]
